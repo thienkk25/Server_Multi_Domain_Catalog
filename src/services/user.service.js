@@ -1,4 +1,4 @@
-import supabase from '../configs/supabase.js'
+import { supabase } from '../configs/supabase.js'
 
 const changePasswordUser = async ({ new_password }) => {
     const { data, error } = await supabase.auth.updateUser({

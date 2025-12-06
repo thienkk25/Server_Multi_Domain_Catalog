@@ -1,6 +1,6 @@
 import { userService } from '../services/user.service.js'
 
-const changePasswordUserController = async (req, res, next) => {
+const changePasswordUser = async (req, res, next) => {
     try {
         const result = await userService.changePasswordUser(req.body)
         res.json({
@@ -11,7 +11,7 @@ const changePasswordUserController = async (req, res, next) => {
         next(error)
     }
 }
-const updatePhoneUserController = async (req, res, next) => {
+const updatePhoneUser = async (req, res, next) => {
     try {
         const result = await userService.updatePhoneUser(req.body)
         res.json({
@@ -22,7 +22,7 @@ const updatePhoneUserController = async (req, res, next) => {
         next(error)
     }
 }
-const updateFullNameUserController = async (req, res, next) => {
+const updateFullNameUser = async (req, res, next) => {
     try {
         const result = await userService.updateFullNameUser(req.body)
         res.json({
@@ -35,5 +35,5 @@ const updateFullNameUserController = async (req, res, next) => {
 }
 
 export const userController = {
-    changePasswordUserController, updateFullNameUserController, updatePhoneUserController
+    changePasswordUser, updateFullNameUser, updatePhoneUser
 }

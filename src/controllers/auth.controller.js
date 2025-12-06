@@ -2,7 +2,7 @@
 import { authService } from '../services/auth.service.js'
 
 
-const loginController = async (req, res, next) => {
+const login = async (req, res, next) => {
     try {
         const result = await authService.signInWithPassword(req.body)
         res.json({
@@ -14,7 +14,7 @@ const loginController = async (req, res, next) => {
     }
 }
 
-const registerController = async (req, res, next) => {
+const register = async (req, res, next) => {
     try {
         const result = await authService.register(req.body)
         res.json({
@@ -26,7 +26,7 @@ const registerController = async (req, res, next) => {
     }
 }
 
-const signOutController = async (req, res, next) => {
+const signOut = async (req, res, next) => {
     try {
         const result = await authService.signOut();
         res.json({
@@ -39,5 +39,5 @@ const signOutController = async (req, res, next) => {
 }
 
 export const authController = {
-    loginController, registerController, signOutController
+    login, register, signOut
 }

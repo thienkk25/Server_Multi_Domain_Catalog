@@ -2,7 +2,7 @@ import { z } from "zod"
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const phoneRegex = /^(0[0-9]{9}|\+84[0-9]{9})$/
 
-const signInWithPasswordSchema = z.object({
+const signInWithPassword = z.object({
     email: z
         .string()
         .regex(emailRegex, "Email không hợp lệ"),
@@ -12,7 +12,7 @@ const signInWithPasswordSchema = z.object({
         .min(6, "Mật khẩu phải tối thiểu 6 ký tự")
 })
 
-const registerSchema = z.object({
+const register = z.object({
     full_name: z
         .string()
         .min(2, "Tên quá ngắn")
@@ -31,6 +31,6 @@ const registerSchema = z.object({
         .regex(phoneRegex, "Số điện thoại không hợp lệ")
 })
 
-export const authValidation = {
-    signInWithPasswordSchema, registerSchema
+export const authValidationSchema = {
+    signInWithPassword, register
 }
