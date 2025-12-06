@@ -1,8 +1,8 @@
 import { userService } from '../services/user.service.js'
 
-const changePasswordUser = async (req, res, next) => {
+const changePassword = async (req, res, next) => {
     try {
-        const result = await userService.changePasswordUser(req.body)
+        const result = await userService.changePassword(req.body)
         res.json({
             success: true,
             data: result
@@ -11,9 +11,9 @@ const changePasswordUser = async (req, res, next) => {
         next(error)
     }
 }
-const updatePhoneUser = async (req, res, next) => {
+const updatePhone = async (req, res, next) => {
     try {
-        const result = await userService.updatePhoneUser(req.body)
+        const result = await userService.updatePhone(req.body)
         res.json({
             success: true,
             data: result
@@ -22,9 +22,9 @@ const updatePhoneUser = async (req, res, next) => {
         next(error)
     }
 }
-const updateFullNameUser = async (req, res, next) => {
+const updateFullName = async (req, res, next) => {
     try {
-        const result = await userService.updateFullNameUser(req.body)
+        const result = await userService.updateFullName(req.body)
         res.json({
             success: true,
             data: result
@@ -35,5 +35,5 @@ const updateFullNameUser = async (req, res, next) => {
 }
 
 export const userController = {
-    changePasswordUser, updateFullNameUser, updatePhoneUser
+    changePassword, updateFullName, updatePhone
 }

@@ -5,8 +5,8 @@ import { userValidationSchema } from '../validations/user.validation.js'
 import { userController } from '../controllers/user.controller.js'
 const router = Router()
 
-router.put('/change-password', authMiddleware, userController.changePasswordUser)
-router.put('/update-phone', validateMiddleware(userValidationSchema.updatePhoneUser), authMiddleware, userController.updatePhoneUser)
-router.put('/update-fullname', validateMiddleware(userValidationSchema.updateFullNameUser), authMiddleware, userController.updateFullNameUser)
+router.patch('/change-password', authMiddleware, userController.changePassword)
+router.patch('/update-phone', validateMiddleware(userValidationSchema.updatePhoneUser), authMiddleware, userController.updatePhone)
+router.patch('/update-fullname', validateMiddleware(userValidationSchema.updateFullNameUser), authMiddleware, userController.updateFullName)
 
 export default router

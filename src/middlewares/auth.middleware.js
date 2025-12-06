@@ -1,4 +1,4 @@
-import supabase from "../configs/supabase.js"
+import { supabase } from "../configs/supabase.js"
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -20,7 +20,7 @@ export const authMiddleware = async (req, res, next) => {
         }
 
         // Xác thực token qua Supabase
-        const { data, error } = await supabase.auth.getUser(token);
+        const { data, error } = await supabase.supabaseClient.auth.getUser(token);
 
         if (error || !data?.user) {
             return res.status(401).json({

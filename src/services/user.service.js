@@ -1,7 +1,7 @@
 import { supabase } from '../configs/supabase.js'
 
-const changePasswordUser = async ({ new_password }) => {
-    const { data, error } = await supabase.auth.updateUser({
+const changePassword = async ({ new_password }) => {
+    const { data, error } = await supabase.supabaseClient.auth.updateUser({
         password: new_password
     });
 
@@ -12,8 +12,8 @@ const changePasswordUser = async ({ new_password }) => {
     return data
 };
 
-const updatePhoneUser = async ({ new_phone }) => {
-    const { data, error } = await supabase.auth.updateUser({
+const updatePhone = async ({ new_phone }) => {
+    const { data, error } = await supabase.supabaseClient.auth.updateUser({
         data: { phone: new_phone }
     })
 
@@ -24,8 +24,8 @@ const updatePhoneUser = async ({ new_phone }) => {
     return data
 }
 
-const updateFullNameUser = async ({ full_name }) => {
-    const { data, error } = await supabase.auth.updateUser({
+const updateFullName = async ({ full_name }) => {
+    const { data, error } = await supabase.supabaseClient.auth.updateUser({
         data: { full_name: full_name }
     })
 
@@ -37,5 +37,5 @@ const updateFullNameUser = async ({ full_name }) => {
 }
 
 export const userService = {
-    changePasswordUser, updateFullNameUser, updatePhoneUser
+    changePassword, updateFullName, updatePhone
 }

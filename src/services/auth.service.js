@@ -1,7 +1,7 @@
 import { supabase } from '../configs/supabase.js'
 
 const signInWithPassword = async ({ email, password }) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.supabaseClient.auth.signInWithPassword({
         email,
         password
     })
@@ -21,7 +21,7 @@ const signInWithPassword = async ({ email, password }) => {
 }
 
 const register = async ({ email, password }) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.supabaseClient.auth.signUp({
         email,
         password
     })
@@ -43,7 +43,7 @@ const register = async ({ email, password }) => {
 }
 
 const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
+    const { error } = await supabase.supabaseClient.auth.signOut()
 
     if (error) {
         const err = new Error(error.message || 'Đăng xuất thất bại')
