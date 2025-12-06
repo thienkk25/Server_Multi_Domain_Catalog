@@ -2,30 +2,30 @@ import { supabase } from '../configs/supabase.js'
 
 const getAll = async () => {
 
-    const { data: domain, error } = await supabase.supabaseClient
-        .from('domain')
+    const { data: category_group, error } = await supabase.supabaseClient
+        .from('category_group')
         .select('*')
 
     if (error) throw error
 
-    return domain
+    return category_group
 }
 
 const getById = async (id) => {
-    const { data: domain, error } = await supabase.supabaseClient
-        .from('domain')
+    const { data: category_group, error } = await supabase.supabaseClient
+        .from('category_group')
         .select('*')
         .eq('id', id)
         .single()
 
     if (error) throw error
 
-    return domain
+    return category_group
 }
 
 const create = async (payload) => {
     const { data, error } = await supabase.supabaseClient
-        .from('domain')
+        .from('category_group')
         .insert(payload)
         .select()
         .single()
@@ -36,7 +36,7 @@ const create = async (payload) => {
 
 const createMany = async (payloadList) => {
     const { data, error } = await supabase.supabaseClient
-        .from('domain')
+        .from('category_group')
         .insert(payloadList)
         .select()
 
@@ -46,7 +46,7 @@ const createMany = async (payloadList) => {
 
 const upsertMany = async (items) => {
     const { data, error } = await supabase.supabaseClient
-        .from('domain')
+        .from('category_group')
         .upsert(items, { onConflict: 'id' })
         .select()
 
@@ -56,7 +56,7 @@ const upsertMany = async (items) => {
 
 const update = async (id, payload) => {
     const { data, error } = await supabase.supabaseClient
-        .from('domain')
+        .from('category_group')
         .update(payload)
         .eq('id', id)
         .select()
@@ -68,13 +68,13 @@ const update = async (id, payload) => {
 
 const remove = async (id) => {
     const { error } = await supabase.supabaseClient
-        .from('domain')
+        .from('category_group')
         .delete()
         .eq('id', id)
 
     if (error) throw error
 }
 
-export const domainService = {
+export const categoryGroupService = {
     getAll, getById, create, createMany, upsertMany, update, remove
 }

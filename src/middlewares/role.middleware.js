@@ -1,4 +1,4 @@
-import supabase from "../configs/supabase.js"
+import { supabase } from "../configs/supabase.js"
 
 export const checkRole = (roles = []) => {
     return async (req, res, next) => {
@@ -6,7 +6,7 @@ export const checkRole = (roles = []) => {
             const userId = req.user.id;
 
             // Lấy role của user từ bảng user_role
-            const { data: userRole, error } = await supabase
+            const { data: userRole, error } = await supabase.supabaseSuperAdmin
                 .from("user_role")
                 .select("role:role_id(code)")
                 .eq("user_id", userId)
