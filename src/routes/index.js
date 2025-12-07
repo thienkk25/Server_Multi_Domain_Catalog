@@ -7,6 +7,7 @@ import categoryItemRoutes from './category.item.routes.js'
 import categoryItemVersionRoutes from './category.item.version.routes.js'
 import categoryItemLegalRefRoutes from './category.item.legal.ref.routes.js'
 import activityLogRoutes from './activity.log.routes.js'
+import apiKeyRoutes from './api.key.routes.js'
 
 const router = Router()
 
@@ -19,6 +20,7 @@ router.use('/category-item-version', categoryItemVersionRoutes)
 router.use('/category-item-legal-ref', categoryItemLegalRefRoutes)
 
 
+router.use('/api-key', apiKeyRoutes)
 router.use('/activity-log', activityLogRoutes)
 
 export default router
