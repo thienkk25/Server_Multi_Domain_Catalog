@@ -5,6 +5,7 @@ import domainRoutes from './domain.routes.js'
 import categoryGroupRoutes from './category.group.routes.js'
 import categoryItemRoutes from './category.item.routes.js'
 import categoryItemVersionRoutes from './category.item.version.routes.js'
+import categoryItemLegalRefRoutes from './category.item.legal.ref.routes.js'
 
 const router = Router()
 
@@ -14,5 +15,6 @@ router.use('/domain', domainRoutes)
 router.use('/category-group', categoryGroupRoutes)
 router.use('/category-item', categoryItemRoutes)
 router.use('/category-item-version', categoryItemVersionRoutes)
+router.use('/category-item-legal-ref', categoryItemLegalRefRoutes)
 
 export default router
