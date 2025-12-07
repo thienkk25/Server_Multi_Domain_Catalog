@@ -1,4 +1,4 @@
-import { supabase } from "../configs/supabase"
+import { supabase } from "../configs/supabase.js"
 
 const getAll = async () => {
 
