@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import userRoutes from './user.routes.js'
 import authRoutes from './auth.routes.js'
+import authAdminRoutes from './auth.admin.routes.js'
 import domainRoutes from './domain.routes.js'
 import categoryGroupRoutes from './category.group.routes.js'
 import categoryItemRoutes from './category.item.routes.js'
@@ -12,6 +13,8 @@ import officerDomainRoutes from './officer.domain.routes.js'
 import csvRoutes from "./csv.routes.js"
 
 const router = Router()
+
+router.use('/admin', authAdminRoutes)
 
 router.use('/auth', authRoutes)
 router.use('/users', userRoutes)
