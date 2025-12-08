@@ -62,9 +62,9 @@ const update = async (id, payload) => {
         .select()
         .single();
 
-    if (error) throw error;
-    return data;
-};
+    if (error) throw error
+    return data
+}
 
 const remove = async (id) => {
     const { error } = await supabase.supabaseClient

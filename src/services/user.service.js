@@ -10,7 +10,7 @@ const changePassword = async ({ new_password }) => {
     }
 
     return data
-};
+}
 
 const updatePhone = async ({ new_phone }) => {
     const { data, error } = await supabase.supabaseClient.auth.updateUser({

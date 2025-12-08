@@ -13,9 +13,9 @@ const signInWithPassword = async ({ email, password }) => {
             'User not found': 'Người dùng không tồn tại'
         };
 
-        const err = new Error(errorMessages[error.message] || error.message);
-        err.status = 401;
-        throw err;
+        const err = new Error(errorMessages[error.message] || error.message)
+        err.status = 401
+        throw err
     }
     return data
 }
@@ -50,7 +50,7 @@ const signOut = async () => {
         err.status = 400
         throw err
     }
-    return { success: true };
+    return { success: true }
 }
 
 export const authService = {

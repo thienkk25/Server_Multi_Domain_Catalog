@@ -11,6 +11,11 @@ const supabaseClient = createClient(supabaseUrl, supabaseAnonPublic, {
 
 
 const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE
-const supabaseSuperAdmin = createClient(supabaseUrl, supabaseServiceRole)
+const supabaseSuperAdmin = createClient(supabaseUrl, supabaseServiceRole, {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false
+    }
+})
 
 export const supabase = { supabaseClient, supabaseSuperAdmin }

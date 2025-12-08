@@ -60,11 +60,11 @@ const update = async (id, payload) => {
         .update(payload)
         .eq('id', id)
         .select()
-        .single();
+        .single()
 
     if (error) throw error;
-    return data;
-};
+    return data
+}
 
 const remove = async (id) => {
     const { error } = await supabase.supabaseClient
