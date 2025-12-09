@@ -11,12 +11,16 @@ import activityLogRoutes from './activity.log.routes.js'
 import apiKeyRoutes from './api.key.routes.js'
 import officerDomainRoutes from './officer.domain.routes.js'
 import csvRoutes from "./csv.routes.js"
+import { limiterMiddleware } from '../middlewares/limiter.middleware.js'
 
 const router = Router()
 
+router.use('/auth', authRoutes)
+
+router.use(limiterMiddleware)
+
 router.use('/admin', authAdminRoutes)
 
-router.use('/auth', authRoutes)
 router.use('/users', userRoutes)
 router.use('/domain', domainRoutes)
 router.use('/category-group', categoryGroupRoutes)

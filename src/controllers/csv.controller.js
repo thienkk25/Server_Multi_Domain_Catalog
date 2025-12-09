@@ -2,14 +2,22 @@ import { importCsvService } from "../services/csv.service.js";
 
 export const importCsvController = async (req, res) => {
     try {
-        const filePath = req.file?.path;
+        const file = req.file;
         const { table } = req.body;
 
-        if (!filePath) {
+        if (!file) {
             return res.status(400).json({ error: "Không có file CSV" });
         }
 
-        const result = await importCsvService(filePath, table);
+        if (file.mimetype !== "text/csv") {
+            return res.status(400).json({ error: "File không phải CSV" });
+        }
+
+        if (!file.originalname.toLowerCase().endsWith(".csv")) {
+            return res.status(400).json({ error: "File phải có đuôi .csv" });
+        }
+
+        const result = await importCsvService(file.path, table);
 
         res.json({
             message: "Upsert CSV thành công!",
