@@ -1,6 +1,4 @@
-
 import { authService } from '../services/auth.service.js'
-
 
 const login = async (req, res, next) => {
     try {
@@ -32,12 +30,24 @@ const signOut = async (req, res, next) => {
         res.json({
             success: true,
             data: result
-        });
+        })
     } catch (err) {
-        next(err);
+        next(err)
+    }
+}
+
+const refreshToken = async (req, res, next) => {
+    try {
+        const result = await authService.refreshToken(req.body);
+        res.json({
+            success: true,
+            data: result
+        })
+    } catch (err) {
+        next(err)
     }
 }
 
 export const authController = {
-    login, register, signOut
+    login, register, signOut, refreshToken
 }

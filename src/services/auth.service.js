@@ -53,6 +53,19 @@ const signOut = async () => {
     return { success: true }
 }
 
+const refreshToken = async ({ refresh_token }) => {
+    const { data, error } = await supabase.supabaseClient.auth.refreshSession({
+        refresh_token: refresh_token
+    })
+
+    if (error) {
+        const err = new Error(error.message || 'refresh_token không hợp lệ')
+        err.status = 400
+        throw err
+    }
+    return data
+}
+
 export const authService = {
-    signInWithPassword, register, signOut
+    signInWithPassword, register, signOut, refreshToken
 }

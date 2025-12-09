@@ -7,5 +7,6 @@ const router = Router()
 router.post('/login', authController.login)
 router.post('/register', authMiddleware, checkRole(['admin']), authController.register)
 router.post('/logout', authController.signOut)
+router.post('/refresh', authController.refreshToken)
 
 export default router
