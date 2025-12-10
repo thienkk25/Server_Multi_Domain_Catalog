@@ -14,7 +14,8 @@ const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE
 const supabaseSuperAdmin = createClient(supabaseUrl, supabaseServiceRole, {
     auth: {
         autoRefreshToken: false,
-        persistSession: false
+        persistSession: false,
+        detectSessionInUrl: false
     }
 })
 
