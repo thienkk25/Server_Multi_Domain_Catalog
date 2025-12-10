@@ -1,8 +1,9 @@
 import { categoryItemVersionService } from '../services/category.item.version.service.js'
-import { handle } from '../utils/handle.helper.js';
+import { handle } from '../utils/handle.helper.js'
+import qs from "qs"
 
 export const categoryItemVersionController = {
-    getAll: handle(req => categoryItemVersionService.getAll(req.query)),
+    getAll: handle(req => categoryItemVersionService.getAll(qs.parse(req.query))),
     getById: handle(req => categoryItemVersionService.getById(req.params.id)),
     create: handle(req => categoryItemVersionService.create(req.body)),
     createMany: handle(req => categoryItemVersionService.createMany(req.body)),

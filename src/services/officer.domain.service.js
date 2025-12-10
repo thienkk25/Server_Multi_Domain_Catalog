@@ -1,14 +1,32 @@
 import { supabase } from '../configs/supabase.js'
 
-const getAll = async () => {
+const getAll = async (query) => {
+    const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
+    const limit = parseInt(query.limit) || 20
+    const offset = (page - 1) * limit
 
-    const { data: officer_domain, error } = await supabase.supabaseClient
-        .from('officer_domain')
-        .select('*')
+    // Khởi tạo query builder
+    let qb = supabase.supabaseClient
+        .from("officer_domain")
+        .select("*", { count: "exact" });
+
+    qb = qb.order("id", { ascending: true })
+
+    qb = qb.range(offset, offset + limit - 1)
+
+    const { data, error, count } = await qb
 
     if (error) throw error
 
-    return officer_domain
+    return {
+        data,
+        pagination: {
+            page,
+            limit,
+            total: count,
+            totalPages: Math.ceil(count / limit),
+        },
+    }
 }
 
 const getById = async (id) => {

@@ -1,8 +1,9 @@
 import { authAdminService } from "../services/auth.admin.service.js"
+import qs from "qs"
 
 const getAll = async (req, res, next) => {
     try {
-        const result = await authAdminService.getAll()
+        const result = await authAdminService.getAll(qs.parse(req.query))
         res.json({
             success: true,
             data: result

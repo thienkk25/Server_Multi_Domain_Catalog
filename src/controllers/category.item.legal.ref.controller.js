@@ -1,8 +1,9 @@
 import { categoryItemLegalRefService } from '../services/category.item.legal.ref.service.js'
-import { handle } from '../utils/handle.helper.js';
+import { handle } from '../utils/handle.helper.js'
+import qs from "qs"
 
 export const categoryItemLegalRefController = {
-    getAll: handle(req => categoryItemLegalRefService.getAll(req.query)),
+    getAll: handle(req => categoryItemLegalRefService.getAll(qs.parse(req.query))),
     getById: handle(req => categoryItemLegalRefService.getById(req.params.id)),
     create: handle(req => categoryItemLegalRefService.create(req.body)),
     createMany: handle(req => categoryItemLegalRefService.createMany(req.body)),

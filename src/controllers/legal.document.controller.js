@@ -1,8 +1,9 @@
 import { legalDocumentService } from '../services/legal.document.service.js'
-import { handle } from '../utils/handle.helper.js';
+import { handle } from '../utils/handle.helper.js'
+import qs from "qs"
 
 export const legalDocumentController = {
-    getAll: handle(req => legalDocumentService.getAll(req.query)),
+    getAll: handle(req => legalDocumentService.getAll(qs.parse(req.query))),
     getById: handle(req => legalDocumentService.getById(req.params.id)),
     create: handle(req => legalDocumentService.create(req.body)),
     createMany: handle(req => legalDocumentService.createMany(req.body)),
