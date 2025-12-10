@@ -9,6 +9,11 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`)
+    next()
+})
+
 if (swaggerDocument) {
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 }
