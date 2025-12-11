@@ -18,6 +18,11 @@ if (swaggerDocument) {
     app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 }
 
+app.get("/", (req, res) => {
+    res.redirect("/docs");
+});
+
+
 app.use('/api/v1', router)
 
 app.use(errorHandler)
