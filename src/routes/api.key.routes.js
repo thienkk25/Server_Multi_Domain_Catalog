@@ -14,7 +14,7 @@ router.post('/bulk', authMiddleware, checkRole(['admin']), apiKeyController.crea
 
 router.post('/bulk/upsert', authMiddleware, checkRole(['admin']), apiKeyController.upsertMany)
 
-router.patch('/:id', authMiddleware, checkRole(['admin']), apiKeyController.update)
+router.put('/:id', authMiddleware, checkRole(['admin']), apiKeyController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin']), apiKeyController.remove)
 
 export default router

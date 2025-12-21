@@ -14,7 +14,7 @@ router.post('/bulk', authMiddleware, checkRole(['admin']), officerDomainControll
 
 router.post('/bulk/upsert', authMiddleware, checkRole(['admin']), officerDomainController.upsertMany)
 
-router.patch('/:id', authMiddleware, checkRole(['admin']), officerDomainController.update)
+router.put('/:id', authMiddleware, checkRole(['admin']), officerDomainController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin']), officerDomainController.remove)
 
 export default router
