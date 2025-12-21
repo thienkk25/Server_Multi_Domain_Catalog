@@ -21,7 +21,7 @@ router.use(limiterMiddleware)
 
 router.use('/admin', authAdminRoutes)
 
-router.use('/users', userRoutes)
+router.use('/user', userRoutes)
 router.use('/domain', domainRoutes)
 router.use('/category-group', categoryGroupRoutes)
 router.use('/category-item', categoryItemRoutes)

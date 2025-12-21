@@ -3,6 +3,9 @@ import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { userController } from '../controllers/user.controller.js'
 const router = Router()
 
+router.get('/me', authMiddleware, userController.me)
+router.get('/', authMiddleware, userController.getUser)
+router.get('/role', authMiddleware, userController.role)
 router.put('/change-password', authMiddleware, userController.changePassword)
 router.put('/update-phone', authMiddleware, userController.updatePhone)
 router.put('/update-fullname', authMiddleware, userController.updateFullName)

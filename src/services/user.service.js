@@ -36,6 +36,39 @@ const updateFullName = async ({ full_name }) => {
     return data
 }
 
+const me = async () => {
+    const { data, error } = await supabase.supabaseClient.auth.getUser()
+    if (error) {
+        throw error
+    }
+    return data
+}
+
+const getUser = async (id) => {
+    const { data, error } = await supabase.supabaseSuperAdmin
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (error) {
+        throw error
+    }
+    return data
+}
+
+const role = async (id) => {
+    const { data: userRole, error } = await supabase.supabaseSuperAdmin
+        .from("user_role")
+        .select("role:role_id(code)")
+        .eq("user_id", id)
+        .single()
+    if (error) {
+        throw error
+    }
+    return userRole
+}
+
 export const userService = {
-    changePassword, updateFullName, updatePhone
+    changePassword, updateFullName, updatePhone, me, getUser, role
 }

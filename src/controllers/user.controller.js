@@ -34,6 +34,42 @@ const updateFullName = async (req, res, next) => {
     }
 }
 
+const me = async (req, res, next) => {
+    try {
+        const result = await userService.me()
+        res.json({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const getUser = async (req, res, next) => {
+    try {
+        const result = await userService.getUser(req.user.id)
+        res.json({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const role = async (req, res, next) => {
+    try {
+        const result = await userService.role(req.user.id)
+        res.json({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export const userController = {
-    changePassword, updateFullName, updatePhone
+    changePassword, updateFullName, updatePhone, me, getUser, role
 }
