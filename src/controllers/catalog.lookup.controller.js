@@ -1,8 +1,8 @@
 import { catalogLookupService } from '../services/catalog.lookup.service.js'
 
-const getDomains = async (req, res, next) => {
+const getDomainsRef = async (req, res, next) => {
     try {
-        const result = await catalogLookupService.getDomains()
+        const result = await catalogLookupService.getDomainsRef()
         res.json(
             {
                 success: true,
@@ -13,9 +13,9 @@ const getDomains = async (req, res, next) => {
     }
 }
 
-const getCategoryGroups = async (req, res, next) => {
+const getCategoryGroupsRef = async (req, res, next) => {
     try {
-        const result = await catalogLookupService.getCategoryGroups(req.params.id)
+        const result = await catalogLookupService.getCategoryGroupsRef(req.params.id)
         res.json({
             success: true,
             data: result
@@ -39,5 +39,5 @@ const searchFlat = async (req, res, next) => {
 }
 
 export const catalogLookupController = {
-    getDomains, getCategoryGroups, searchFlat
+    getDomainsRef, getCategoryGroupsRef, searchFlat
 }

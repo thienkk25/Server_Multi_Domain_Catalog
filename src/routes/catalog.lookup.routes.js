@@ -3,7 +3,7 @@ import { catalogLookupController } from '../controllers/catalog.lookup.controlle
 const router = Router()
 
 router.get("/", catalogLookupController.searchFlat)
-router.get("/domains", catalogLookupController.getDomains)
-router.get("/category-groups/:id", catalogLookupController.getCategoryGroups)
+router.get("/domains", catalogLookupController.getDomainsRef)
+router.get("/category-groups/:id", catalogLookupController.getCategoryGroupsRef)
 
 export default router

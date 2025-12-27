@@ -1,6 +1,6 @@
 import { supabase } from '../configs/supabase.js'
 
-const getDomains = async () => {
+const getDomainsRef = async () => {
     const { data, error } = await supabase.supabaseClient
         .from('domain')
         .select('id, name')
@@ -10,7 +10,7 @@ const getDomains = async () => {
     return data
 }
 
-const getCategoryGroups = async (id) => {
+const getCategoryGroupsRef = async (id) => {
     const { data, error } = await supabase.supabaseClient
         .from('category_group')
         .select('id, name')
@@ -44,5 +44,5 @@ const searchFlat = async ({
 }
 
 export const catalogLookupService = {
-    getDomains, getCategoryGroups, searchFlat
+    getDomainsRef, getCategoryGroupsRef, searchFlat
 }
