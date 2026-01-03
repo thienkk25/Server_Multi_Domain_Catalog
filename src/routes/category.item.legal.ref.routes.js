@@ -14,7 +14,7 @@ router.post('/bulk', authMiddleware, checkRole(['admin', 'domainOfficer']), cate
 
 router.post('/bulk/upsert', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemLegalRefController.upsertMany)
 
-router.put('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemLegalRefController.update)
+router.patch('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemLegalRefController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemLegalRefController.remove)
 
 export default router
