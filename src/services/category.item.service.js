@@ -22,7 +22,12 @@ const getAll = async (query) => {
                         code,
                         name
                     )
-                )`, { count: "exact" });
+                ),
+                created_by,
+                updated_by,
+                created_at,
+                updated_at
+                `, { count: "exact" });
 
     if (query.search) {
         const s = query.search;
