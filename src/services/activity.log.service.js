@@ -10,6 +10,14 @@ const getAll = async (query) => {
         .from("activity_log")
         .select("*", { count: "exact" });
 
+    if (query.search) {
+        const s = query.search;
+
+        qb = qb.or(
+            `action.ilike.%${s}%,endpoint.ilike.%${s}%,method.ilike.%${s}%`
+        )
+    }
+
     if (query.filter) {
         for (const key in query.filter) {
             const value = query.filter[key];
