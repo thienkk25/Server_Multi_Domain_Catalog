@@ -8,7 +8,21 @@ const getAll = async (query) => {
     // Khởi tạo query builder
     let qb = supabase.supabaseClient
         .from("category_item")
-        .select("*", { count: "exact" });
+        .select(`id,
+                code,
+                name,
+                description,
+                status,
+                group:group_id (
+                    id,
+                    code,
+                    name,
+                    domain:domain_id (
+                        id,
+                        code,
+                        name
+                    )
+                )`, { count: "exact" });
 
     if (query.search) {
         const s = query.search;
