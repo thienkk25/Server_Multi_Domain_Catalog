@@ -3,7 +3,7 @@ import { supabase } from '../configs/supabase.js'
 const getDomainsRef = async () => {
     const { data, error } = await supabase.supabaseClient
         .from('domain')
-        .select('id, name')
+        .select('id, code, name')
         .order('name')
 
     if (error) throw error
@@ -13,7 +13,7 @@ const getDomainsRef = async () => {
 const getCategoryGroupsRef = async (id) => {
     const { data, error } = await supabase.supabaseClient
         .from('category_group')
-        .select('id, name')
+        .select('id,code, name')
         .eq('domain_id', id)
         .order('name')
 
