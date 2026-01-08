@@ -121,18 +121,19 @@ const update = async (id, payload, file) => {
         .single()
 
     if (fetchError) throw fetchError
-
+    let fileUrl = oldDoc.file_url
     let fileInfo = null
 
     // Upload file mới nếu có
     if (file) {
         fileInfo = await uploadFile(file)
+        fileUrl = fileInfo.file_path
     }
 
     // Update DB
     const cleanPayload = {
         ...payload,
-        file_url: fileInfo.file_path
+        file_url: fileUrl
     }
 
     const { data, error } = await supabase.supabaseClient
@@ -188,7 +189,7 @@ const uploadFile = async (file) => {
     if (error) throw error
 
     return {
-        file_path: data.path,          // 👈 RÕ RÀNG
+        file_path: data.path,
         original_name: file.originalname,
         mime_type: file.mimetype,
         file_size: file.size,

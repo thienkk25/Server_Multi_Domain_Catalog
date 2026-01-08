@@ -5,10 +5,10 @@ import qs from "qs"
 export const legalDocumentController = {
     getAll: handle(req => legalDocumentService.getAll(qs.parse(req.query))),
     getById: handle(req => legalDocumentService.getById(req.params.id)),
-    create: handle(req => legalDocumentService.create(req.body)),
+    create: handle(req => legalDocumentService.create(req.body, req.file)),
     createMany: handle(req => legalDocumentService.createMany(req.body)),
     upsertMany: handle(req => legalDocumentService.upsertMany(req.body)),
-    update: handle(req => legalDocumentService.update(req.params.id, req.body)),
+    update: handle(req => legalDocumentService.update(req.params.id, req.body, req.file)),
     remove: handle(req => legalDocumentService.remove(req.params.id)),
     getSignedUrl: handle(req => legalDocumentService.getSignedUrl(req.file.path))
 };
