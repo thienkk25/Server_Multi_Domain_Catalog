@@ -10,4 +10,5 @@ export const legalDocumentController = {
     upsertMany: handle(req => legalDocumentService.upsertMany(req.body)),
     update: handle(req => legalDocumentService.update(req.params.id, req.body)),
     remove: handle(req => legalDocumentService.remove(req.params.id)),
+    getSignedUrl: handle(req => legalDocumentService.getSignedUrl(req.file.path))
 };

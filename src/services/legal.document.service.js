@@ -1,4 +1,5 @@
 import { supabase } from '../configs/supabase.js'
+import path from 'path'
 
 const getAll = async (query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
@@ -71,10 +72,19 @@ const getById = async (id) => {
     return legal_document
 }
 
-const create = async (payload) => {
+const create = async (payload, file) => {
+    let fileInfo = null
+
+    if (file) {
+        fileInfo = await uploadFile(file)
+    }
+
     const { data, error } = await supabase.supabaseClient
         .from('legal_document')
-        .insert(payload)
+        .insert({
+            ...payload,
+            file_url: fileInfo?.file_path ?? null,
+        })
         .select()
         .single()
 
@@ -102,17 +112,49 @@ const upsertMany = async (items) => {
     return data
 }
 
-const update = async (id, payload) => {
+const update = async (id, payload, file) => {
+    // Lấy document cũ
+    const { data: oldDoc, error: fetchError } = await supabase.supabaseClient
+        .from('legal_document')
+        .select('file_url')
+        .eq('id', id)
+        .single()
+
+    if (fetchError) throw fetchError
+
+    let fileInfo = null
+
+    // Upload file mới nếu có
+    if (file) {
+        fileInfo = await uploadFile(file)
+    }
+
+    // Update DB
+    const cleanPayload = {
+        ...payload,
+        file_url: fileInfo.file_path
+    }
+
     const { data, error } = await supabase.supabaseClient
         .from('legal_document')
-        .update(payload)
+        .update(cleanPayload)
         .eq('id', id)
         .select()
         .single()
 
-    if (error) throw error;
+    if (error) throw error
+
+    // Xoá file cũ (SAU KHI update thành công)
+    if (fileInfo && oldDoc?.file_url) {
+        await supabase.supabaseClient.storage
+            .from('legal_document_file')
+            .remove([oldDoc.file_url])
+    }
+
     return data
 }
+
+
 
 const remove = async (id) => {
     const { error } = await supabase.supabaseClient
@@ -123,6 +165,46 @@ const remove = async (id) => {
     if (error) throw error
 }
 
+const uploadFile = async (file) => {
+    if (!file) throw new Error('File is required')
+
+    const ext = path.extname(file.originalname)
+    const baseName = path.basename(file.originalname, ext)
+
+    const safeName = baseName
+        .toLowerCase()
+        .replace(/[^a-z0-9-_]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+
+    const fileName = `${crypto.randomUUID()}-${safeName}${ext}`
+    const storagePath = `files/${fileName}`
+
+    const { data, error } = await supabase.supabaseClient.storage
+        .from('legal_document_file')
+        .upload(storagePath, file.buffer, {
+            contentType: file.mimetype,
+        })
+
+    if (error) throw error
+
+    return {
+        file_path: data.path,          // 👈 RÕ RÀNG
+        original_name: file.originalname,
+        mime_type: file.mimetype,
+        file_size: file.size,
+    }
+}
+
+const getSignedUrl = async (filePath) => {
+    const { data, error } = await supabase.supabaseClient.storage
+        .from('legal_document_file')
+        .createSignedUrl(filePath, 60 * 5) // 5 phút
+
+    if (error) throw error
+    return data.signedUrl
+}
+
+
 export const legalDocumentService = {
-    getAll, getById, create, createMany, upsertMany, update, remove
+    getAll, getById, create, createMany, upsertMany, update, remove, getSignedUrl
 }

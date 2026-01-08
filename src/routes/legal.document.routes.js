@@ -17,4 +17,6 @@ router.post('/bulk/upsert', authMiddleware, checkRole(['admin']), legalDocumentC
 router.patch('/:id', authMiddleware, checkRole(['admin']), legalDocumentController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin']), legalDocumentController.remove)
 
+router.get('/download', legalDocumentController.getSignedUrl)
+
 export default router
