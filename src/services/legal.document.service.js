@@ -209,9 +209,8 @@ const uploadFile = async (file) => {
 
     const link = supabase.supabaseClient.storage
         .from('legal_document_file')
-        .getPublicUrl(data.fullPath);
+        .getPublicUrl(data.path);
     const publicUrl = link.data.publicUrl;
-
 
     return {
         file_path: data.path,
@@ -229,6 +228,15 @@ const getSignedUrl = async (filePath) => {
 
     if (error) throw error
     return data.signedUrl
+}
+
+const downloadFile = async (filePath) => {
+    const { data, error } = await supabase.supabaseClient.storage
+        .from('legal_document_file')
+        .download(filePath)
+
+    if (error) throw error
+    return data
 }
 
 
