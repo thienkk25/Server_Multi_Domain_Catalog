@@ -114,7 +114,6 @@ const upsertMany = async (items) => {
 }
 
 const update = async (id, payload, file) => {
-    // Lấy document cũ
     const { data: oldDoc, error: fetchError } = await supabase.supabaseClient
         .from('legal_document')
         .select('file_name,file_url')
@@ -127,14 +126,12 @@ const update = async (id, payload, file) => {
     let fileUrl = oldDoc.file_url
     let fileInfo = null
 
-    // Upload file mới nếu có
     if (file) {
         fileInfo = await uploadFile(file)
         file_name = fileInfo.file_name
         fileUrl = fileInfo.public_url
     }
 
-    // Update DB
     const cleanPayload = {
         ...payload,
         file_name: file_name,
@@ -151,12 +148,11 @@ const update = async (id, payload, file) => {
 
     if (error) throw error
 
-    // // Xoá file cũ (SAU KHI update thành công)
-    // if (fileInfo && oldDoc?.file_url !== fileInfo.public_url) {
-    //     await supabase.supabaseClient.storage
-    //         .from('legal_document_file')
-    //         .remove([oldDoc.file_url])
-    // }
+    if (fileInfo && oldDoc?.file_url != fileUrl) {
+        await supabase.supabaseClient.storage
+            .from('legal_document_file')
+            .remove([oldDoc.file_url.split('public/legal_document_file/legal_document_file/').pop()])
+    }
 
     return data
 }
@@ -164,6 +160,18 @@ const update = async (id, payload, file) => {
 
 
 const remove = async (id) => {
+    const { data: fileUrl } = await supabase.supabaseClient
+        .from('legal_document')
+        .select('file_url')
+        .eq('id', id)
+        .maybeSingle()
+
+    if (fileUrl) {
+        await supabase.supabaseClient.storage
+            .from('legal_document_file')
+            .remove([fileUrl.file_url.split('public/legal_document_file/legal_document_file/').pop()])
+    }
+
     const { error } = await supabase.supabaseClient
         .from('legal_document')
         .delete()
