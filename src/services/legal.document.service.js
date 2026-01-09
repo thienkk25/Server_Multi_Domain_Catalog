@@ -8,7 +8,7 @@ const getAll = async (query) => {
 
     // Khởi tạo query builder
     let qb = supabase.supabaseClient
-        .from("legal_document")
+        .from("public_legal_document")
         .select("*", { count: "exact" });
 
     if (query.search) {
