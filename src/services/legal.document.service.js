@@ -83,7 +83,8 @@ const create = async (payload, file) => {
         .from('legal_document')
         .insert({
             ...payload,
-            file_url: fileInfo?.file_path ?? null,
+            file_name: fileInfo?.file_name ?? file?.originalname ?? null,
+            file_url: fileInfo?.public_url ?? null,
         })
         .select()
         .single()
@@ -116,24 +117,29 @@ const update = async (id, payload, file) => {
     // Lấy document cũ
     const { data: oldDoc, error: fetchError } = await supabase.supabaseClient
         .from('legal_document')
-        .select('file_url')
+        .select('file_name,file_url')
         .eq('id', id)
         .single()
 
     if (fetchError) throw fetchError
+
+    let file_name = oldDoc.file_name
     let fileUrl = oldDoc.file_url
     let fileInfo = null
 
     // Upload file mới nếu có
     if (file) {
         fileInfo = await uploadFile(file)
-        fileUrl = fileInfo.file_path
+        file_name = fileInfo.file_name
+        fileUrl = fileInfo.public_url
     }
 
     // Update DB
     const cleanPayload = {
         ...payload,
+        file_name: file_name,
         file_url: fileUrl
+
     }
 
     const { data, error } = await supabase.supabaseClient
@@ -145,12 +151,12 @@ const update = async (id, payload, file) => {
 
     if (error) throw error
 
-    // Xoá file cũ (SAU KHI update thành công)
-    if (fileInfo && oldDoc?.file_url) {
-        await supabase.supabaseClient.storage
-            .from('legal_document_file')
-            .remove([oldDoc.file_url])
-    }
+    // // Xoá file cũ (SAU KHI update thành công)
+    // if (fileInfo && oldDoc?.file_url !== fileInfo.public_url) {
+    //     await supabase.supabaseClient.storage
+    //         .from('legal_document_file')
+    //         .remove([oldDoc.file_url])
+    // }
 
     return data
 }
@@ -167,6 +173,7 @@ const remove = async (id) => {
 }
 
 const uploadFile = async (file) => {
+
     if (!file) throw new Error('File is required')
 
     const ext = path.extname(file.originalname)
@@ -177,8 +184,12 @@ const uploadFile = async (file) => {
         .replace(/[^a-z0-9-_]+/g, '-')
         .replace(/^-+|-+$/g, '')
 
-    const fileName = `${crypto.randomUUID()}-${safeName}${ext}`
-    const storagePath = `files/${fileName}`
+    const storageKey = `${crypto.randomUUID()}-${safeName}${ext}`
+    const fileName = Buffer
+        .from(file.originalname, 'latin1')
+        .toString('utf8');
+
+    const storagePath = `files/${storageKey}`
 
     const { data, error } = await supabase.supabaseClient.storage
         .from('legal_document_file')
@@ -188,11 +199,18 @@ const uploadFile = async (file) => {
 
     if (error) throw error
 
+    const link = supabase.supabaseClient.storage
+        .from('legal_document_file')
+        .getPublicUrl(data.fullPath);
+    const publicUrl = link.data.publicUrl;
+
+
     return {
         file_path: data.path,
-        original_name: file.originalname,
+        file_name: fileName,
         mime_type: file.mimetype,
         file_size: file.size,
+        public_url: publicUrl
     }
 }
 
