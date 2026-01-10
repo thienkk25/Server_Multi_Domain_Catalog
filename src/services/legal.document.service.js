@@ -62,7 +62,7 @@ const getAll = async (query) => {
 
 const getById = async (id) => {
     const { data: legal_document, error } = await supabase.supabaseClient
-        .from('legal_document')
+        .from('public_legal_document')
         .select('*')
         .eq('id', id)
         .single()
@@ -151,7 +151,7 @@ const update = async (id, payload, file) => {
     if (fileInfo && oldDoc?.file_url != fileUrl) {
         await supabase.supabaseClient.storage
             .from('legal_document_file')
-            .remove([oldDoc.file_url.split('public/legal_document_file/legal_document_file/').pop()])
+            .remove([oldDoc.file_url.split('legal_document_file/').pop()])
     }
 
     return data
@@ -169,7 +169,7 @@ const remove = async (id) => {
     if (fileUrl) {
         await supabase.supabaseClient.storage
             .from('legal_document_file')
-            .remove([fileUrl.file_url.split('public/legal_document_file/legal_document_file/').pop()])
+            .remove([fileUrl.file_url.split('legal_document_file/').pop()])
     }
 
     const { error } = await supabase.supabaseClient
