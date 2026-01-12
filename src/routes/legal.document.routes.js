@@ -14,6 +14,7 @@ const router = Router()
 
 router.get('/', legalDocumentController.getAll)
 router.get('/:id', legalDocumentController.getById)
+router.get('/documents/with-file', legalDocumentController.getLegalDocumentsWithFile)
 
 router.post('/', authMiddleware, checkRole(['admin']), upload.single('file'), legalDocumentController.create)
 router.post('/bulk', authMiddleware, checkRole(['admin']), legalDocumentController.createMany)
