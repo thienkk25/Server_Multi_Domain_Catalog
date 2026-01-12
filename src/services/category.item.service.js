@@ -81,7 +81,25 @@ const getAll = async (query) => {
 const getById = async (id) => {
     const { data: category_item, error } = await supabase.supabaseClient
         .from('category_item')
-        .select('*')
+        .select(`id,
+                code,
+                name,
+                description,
+                status,
+                group:group_id (
+                    id,
+                    code,
+                    name,
+                    domain:domain_id (
+                        id,
+                        code,
+                        name
+                    )
+                ),
+                created_by,
+                updated_by,
+                created_at,
+                updated_at`)
         .eq('id', id)
         .single()
 
@@ -98,7 +116,7 @@ const create = async (payload) => {
         .single()
 
     if (error) throw error
-    return data
+    return getById(data.id)
 }
 
 const createMany = async (payloadList) => {
@@ -130,7 +148,7 @@ const update = async (id, payload) => {
         .single();
 
     if (error) throw error;
-    return data;
+    return getById(data.id);
 }
 
 const remove = async (id) => {
