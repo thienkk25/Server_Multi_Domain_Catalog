@@ -4,7 +4,7 @@ import { userController } from '../controllers/user.controller.js'
 const router = Router()
 
 router.get('/me', authMiddleware, userController.me)
-router.get('/', authMiddleware, userController.getUser)
+router.get('/', authMiddleware, userController.getProfile)
 router.get('/role', authMiddleware, userController.role)
 router.patch('/change-password', authMiddleware, userController.changePassword)
 router.patch('/update-profile', authMiddleware, userController.updateProfile)

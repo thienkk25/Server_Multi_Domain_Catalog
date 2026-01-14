@@ -13,7 +13,7 @@ const changePassword = async (req, res, next) => {
 }
 const updateProfile = async (req, res, next) => {
     try {
-        const result = await userService.updatePhone(req.body)
+        const result = await userService.updateProfile(req.body)
         res.json({
             success: true,
             data: result
@@ -35,9 +35,9 @@ const me = async (req, res, next) => {
     }
 }
 
-const getUser = async (req, res, next) => {
+const getProfile = async (req, res, next) => {
     try {
-        const result = await userService.getUser(req.user.id)
+        const result = await userService.getProfile()
         res.json({
             success: true,
             data: result
@@ -60,5 +60,5 @@ const role = async (req, res, next) => {
 }
 
 export const userController = {
-    changePassword, updateProfile, me, getUser, role
+    changePassword, updateProfile, me, getProfile, role
 }

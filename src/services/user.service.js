@@ -42,11 +42,10 @@ const me = async () => {
     return data
 }
 
-const getUser = async (id) => {
+const getProfile = async () => {
     const { data, error } = await supabase.supabaseClient
-        .from('users')
+        .from('profile')
         .select('*')
-        .eq('id', id)
         .single()
 
     if (error) {
@@ -68,5 +67,5 @@ const role = async (id) => {
 }
 
 export const userService = {
-    changePassword, updateProfile, me, getUser, role
+    changePassword, updateProfile, me, getProfile, role
 }
