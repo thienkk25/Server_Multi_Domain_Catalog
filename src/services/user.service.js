@@ -12,9 +12,18 @@ const changePassword = async ({ new_password }) => {
     return data
 }
 
-const updatePhone = async ({ new_phone }) => {
+const updateProfile = async ({ phone, full_name }) => {
+    const payload = {}
+
+    if (phone !== undefined) payload.phone = phone
+    if (full_name !== undefined) payload.full_name = full_name
+
+    if (Object.keys(payload).length === 0) {
+        throw new Error('No data to update')
+    }
+
     const { data, error } = await supabase.supabaseClient.auth.updateUser({
-        data: { phone: new_phone }
+        data: payload
     })
 
     if (error) {
@@ -24,17 +33,6 @@ const updatePhone = async ({ new_phone }) => {
     return data
 }
 
-const updateFullName = async ({ full_name }) => {
-    const { data, error } = await supabase.supabaseClient.auth.updateUser({
-        data: { full_name: full_name }
-    })
-
-    if (error) {
-        throw error
-    }
-
-    return data
-}
 
 const me = async () => {
     const { data, error } = await supabase.supabaseClient.auth.getUser()
@@ -45,7 +43,7 @@ const me = async () => {
 }
 
 const getUser = async (id) => {
-    const { data, error } = await supabase.supabaseSuperAdmin
+    const { data, error } = await supabase.supabaseClient
         .from('users')
         .select('*')
         .eq('id', id)
@@ -70,5 +68,5 @@ const role = async (id) => {
 }
 
 export const userService = {
-    changePassword, updateFullName, updatePhone, me, getUser, role
+    changePassword, updateProfile, me, getUser, role
 }

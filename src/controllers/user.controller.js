@@ -11,20 +11,9 @@ const changePassword = async (req, res, next) => {
         next(error)
     }
 }
-const updatePhone = async (req, res, next) => {
+const updateProfile = async (req, res, next) => {
     try {
         const result = await userService.updatePhone(req.body)
-        res.json({
-            success: true,
-            data: result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-const updateFullName = async (req, res, next) => {
-    try {
-        const result = await userService.updateFullName(req.body)
         res.json({
             success: true,
             data: result
@@ -71,5 +60,5 @@ const role = async (req, res, next) => {
 }
 
 export const userController = {
-    changePassword, updateFullName, updatePhone, me, getUser, role
+    changePassword, updateProfile, me, getUser, role
 }

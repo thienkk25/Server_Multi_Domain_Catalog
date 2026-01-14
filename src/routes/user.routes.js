@@ -7,7 +7,6 @@ router.get('/me', authMiddleware, userController.me)
 router.get('/', authMiddleware, userController.getUser)
 router.get('/role', authMiddleware, userController.role)
 router.patch('/change-password', authMiddleware, userController.changePassword)
-router.patch('/update-phone', authMiddleware, userController.updatePhone)
-router.patch('/update-fullname', authMiddleware, userController.updateFullName)
+router.patch('/update-profile', authMiddleware, userController.updateProfile)
 
 export default router
