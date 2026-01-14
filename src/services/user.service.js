@@ -15,7 +15,16 @@ const changePassword = async ({ new_password }) => {
 const updateProfile = async ({ phone, full_name }) => {
     const payload = {}
 
-    if (phone !== undefined) payload.phone = phone
+    if (phone !== undefined) {
+        const regPhone = /^(?:\+84|0084|0)(3|5|7|8|9)[0-9]{8}$/;
+
+        if (!regPhone.test(phone)) {
+            throw new Error('Invalid phone number');
+        }
+
+        payload.phone = phone;
+    }
+
     if (full_name !== undefined) payload.full_name = full_name
 
     if (Object.keys(payload).length === 0) {
