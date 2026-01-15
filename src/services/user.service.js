@@ -1,6 +1,15 @@
 import { supabase } from '../configs/supabase.js'
 
 const changePassword = async ({ new_password }) => {
+    if (
+        new_password.length < 8 ||
+        !/[A-Z]/.test(new_password) ||
+        !/\d/.test(new_password)
+    ) {
+        throw new Error('Invalid password');
+    }
+
+
     const { data, error } = await supabase.supabaseClient.auth.updateUser({
         password: new_password
     });
