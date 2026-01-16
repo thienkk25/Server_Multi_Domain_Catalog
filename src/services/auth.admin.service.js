@@ -6,15 +6,28 @@ const getAll = async (query) => {
     const offset = (page - 1) * limit
 
     // Khởi tạo query builder
-    let qb = supabase.supabaseClient
+    let qb = supabase.supabaseSuperAdmin
         .from("users")
-        .select("*", { count: "exact" });
+        .select(`*,
+            user_role!left (
+                role:role_id (
+                    *
+                )
+            ),
+            officer_domain!left (
+                domain:domain_id (
+                    id,
+                    code,
+                    name
+                )
+            )
+            `, { count: "exact" });
 
     if (query.search) {
         const s = query.search;
 
         qb = qb.or(
-            `name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%,full_name.ilike.%${s}%`
+            `full_name.ilike.%${s}%,email.ilike.%${s}%,phone.ilike.%${s}%,full_name.ilike.%${s}%`
         )
     }
 
@@ -84,6 +97,28 @@ const remove = async (id) => {
     return data
 }
 
+const activateUser = async (userId) => {
+    const { data, error } = await supabase.supabaseClient
+        .from('users')
+        .update({ status: 'active' })
+        .eq('id', userId)
+
+    if (error) throw error
+    return data
+}
+
+
+const deactivateUser = async (userId) => {
+    const { data, error } = await supabase.supabaseClient
+        .from('users')
+        .update({ status: 'inactive' })
+        .eq('id', userId)
+
+    if (error) throw error
+    return data
+}
+
+
 export const authAdminService = {
-    getAll, getById, create, remove
+    getAll, getById, create, remove, activateUser, deactivateUser
 }

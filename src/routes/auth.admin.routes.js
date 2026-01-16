@@ -7,6 +7,8 @@ const router = Router()
 router.get('/', authMiddleware, checkRole(['admin']), authAdminController.getAll)
 router.get('/:id', authMiddleware, checkRole(['admin']), authAdminController.getById)
 
+router.post('/:id/activate', authMiddleware, checkRole(['admin']), authAdminController.activateUser)
+router.post('/:id/deactivate', authMiddleware, checkRole(['admin']), authAdminController.deactivateUser)
 router.post('/', authMiddleware, checkRole(['admin']), authAdminController.create)
 router.delete('/:id', authMiddleware, checkRole(['admin']), authAdminController.remove)
 

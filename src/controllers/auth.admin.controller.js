@@ -50,6 +50,30 @@ const remove = async (req, res, next) => {
     }
 }
 
+const activateUser = async (req, res, next) => {
+    try {
+        const result = await authAdminService.activateUser(req.params.id)
+        res.json({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const deactivateUser = async (req, res, next) => {
+    try {
+        const result = await authAdminService.deactivateUser(req.params.id)
+        res.json({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export const authAdminController = {
     getAll, getById, create, remove
 }
