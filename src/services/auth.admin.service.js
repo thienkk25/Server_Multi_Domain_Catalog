@@ -7,21 +7,9 @@ const getAll = async (query) => {
 
     // Khởi tạo query builder
     let qb = supabase.supabaseSuperAdmin
-        .from("users")
-        .select(`*,
-            user_role!left (
-                role:role_id (
-                    *
-                )
-            ),
-            officer_domain!left (
-                domain:domain_id (
-                    id,
-                    code,
-                    name
-                )
-            )
-            `, { count: "exact" });
+        .from("admin_user_list")
+        .select("*", { count: "exact" })
+
 
     if (query.search) {
         const s = query.search;

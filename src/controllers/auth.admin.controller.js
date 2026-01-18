@@ -75,5 +75,5 @@ const deactivateUser = async (req, res, next) => {
 }
 
 export const authAdminController = {
-    getAll, getById, create, remove
+    getAll, getById, create, remove, activateUser, deactivateUser
 }
