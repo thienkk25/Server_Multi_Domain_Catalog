@@ -67,11 +67,14 @@ const getById = async (id) => {
     return data
 }
 
-const create = async ({ email, password, userMetadata }) => {
+const create = async ({ email, password, user_metadata }) => {
+    if (password == null || password == '' || password == undefined) {
+        password = '12345678'
+    }
     const { data, error } = await supabase.supabaseSuperAdmin.auth.admin.createUser({
         email: email,
         password: password,
-        user_metadata: userMetadata
+        user_metadata: user_metadata
     })
     if (error) throw error
 
