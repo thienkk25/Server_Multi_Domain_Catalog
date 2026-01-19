@@ -105,6 +105,8 @@ const activateUser = async (userId) => {
         .from('users')
         .update({ status: 'active' })
         .eq('id', userId)
+        .select()
+        .single()
 
     if (error) throw error
     return data
@@ -116,6 +118,8 @@ const deactivateUser = async (userId) => {
         .from('users')
         .update({ status: 'inactive' })
         .eq('id', userId)
+        .select()
+        .single()
 
     if (error) throw error
     return data
