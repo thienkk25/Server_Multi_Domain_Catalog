@@ -74,19 +74,31 @@ const create = async ({ email, password, user_metadata }) => {
     const { data, error } = await supabase.supabaseSuperAdmin.auth.admin.createUser({
         email: email,
         password: password,
-        user_metadata: user_metadata
+        user_metadata: user_metadata,
+        email_confirm: true,
+        phone_confirm: false,
     })
     if (error) throw error
 
     return data
 }
 
-const remove = async (id) => {
-    const { data, error } = await supabase.supabaseSuperAdmin.auth.admin.deleteUser(id)
-    if (error) throw error
+const remove = async (userId) => {
+    const { data: authData, error: authError } =
+        await supabase.supabaseSuperAdmin.auth.admin.deleteUser(userId)
 
-    return data
+    if (authError) throw authError
+
+    const { error: dbError } = await supabase.supabaseClient
+        .from('users')
+        .delete()
+        .eq('id', userId)
+
+    if (dbError) throw dbError
+
+    return authData
 }
+
 
 const activateUser = async (userId) => {
     const { data, error } = await supabase.supabaseClient
