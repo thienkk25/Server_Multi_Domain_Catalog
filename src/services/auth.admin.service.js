@@ -61,7 +61,11 @@ const getAll = async (query) => {
 }
 
 const getById = async (id) => {
-    const { data, error } = await supabase.supabaseSuperAdmin.auth.admin.getUserById(id)
+    const { data, error } = await supabase.supabaseSuperAdmin
+        .from("admin_user_list")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle()
     if (error) throw error
 
     return data
@@ -80,11 +84,12 @@ const create = async ({ email, password, user_metadata }) => {
     })
     if (error) throw error
 
-    return data
+    return getById(data.user.id)
+
 }
 
 const remove = async (userId) => {
-    const { data: authData, error: authError } =
+    const { error: authError } =
         await supabase.supabaseSuperAdmin.auth.admin.deleteUser(userId)
 
     if (authError) throw authError
@@ -96,36 +101,34 @@ const remove = async (userId) => {
 
     if (dbError) throw dbError
 
-    return authData
 }
 
 
 const activateUser = async (userId) => {
-    const { data, error } = await supabase.supabaseClient
+    const { error } = await supabase.supabaseClient
         .from('users')
         .update({ status: 'active' })
         .eq('id', userId)
-        .select()
-        .single()
 
     if (error) throw error
-    return data
+
+    return getById(userId)
+
 }
 
 
 const deactivateUser = async (userId) => {
-    const { data, error } = await supabase.supabaseClient
+    const { error } = await supabase.supabaseClient
         .from('users')
         .update({ status: 'inactive' })
         .eq('id', userId)
-        .select()
-        .single()
 
     if (error) throw error
 
     await supabase.supabaseSuperAdmin.auth.admin.signOut(userId)
 
-    return data
+    return getById(userId)
+
 }
 
 
