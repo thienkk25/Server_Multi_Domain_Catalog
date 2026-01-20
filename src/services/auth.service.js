@@ -1,24 +1,51 @@
 import { supabase } from '../configs/supabase.js'
 
 const signInWithPassword = async ({ email, password }) => {
-    const { data, error } = await supabase.supabaseClient.auth.signInWithPassword({
-        email,
-        password
-    })
+    if (!email || !password) {
+        const err = new Error('Thiếu thông tin đăng nhập')
+        err.status = 400
+        throw err
+    }
 
-    if (error) {
+    const { data: userRow } = await supabase.supabaseSuperAdmin
+        .from('users')
+        .select('id, status')
+        .eq('email', email)
+        .maybeSingle()
+
+    if (!userRow) {
+        const err = new Error('Người dùng không tồn tại')
+        err.status = 404
+        throw err
+    }
+
+    if (userRow.status === 'inactive') {
+        const err = new Error('Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên')
+        err.status = 403
+        throw err
+    }
+
+    const { data, error: authError } =
+        await supabase.supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        })
+
+    if (authError) {
         const errorMessages = {
             'Invalid login credentials': 'Email hoặc mật khẩu không đúng',
             'Email not confirmed': 'Email chưa được xác thực',
             'User not found': 'Người dùng không tồn tại'
-        };
+        }
 
-        const err = new Error(errorMessages[error.message] || error.message)
+        const err = new Error(errorMessages[authError.message] || authError.message)
         err.status = 401
         throw err
     }
+
     return data
 }
+
 
 const register = async ({ email, password }) => {
     const { data, error } = await supabase.supabaseClient.auth.signUp({

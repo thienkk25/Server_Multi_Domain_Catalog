@@ -122,6 +122,9 @@ const deactivateUser = async (userId) => {
         .single()
 
     if (error) throw error
+
+    await supabase.supabaseSuperAdmin.auth.admin.signOut(userId)
+
     return data
 }
 
