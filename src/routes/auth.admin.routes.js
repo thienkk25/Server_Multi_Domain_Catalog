@@ -10,6 +10,7 @@ router.get('/:id', authMiddleware, checkRole(['admin']), authAdminController.get
 router.patch('/:id/activate', authMiddleware, checkRole(['admin']), authAdminController.activateUser)
 router.patch('/:id/deactivate', authMiddleware, checkRole(['admin']), authAdminController.deactivateUser)
 router.post('/', authMiddleware, checkRole(['admin']), authAdminController.create)
+router.patch('/:id', authMiddleware, checkRole(['admin']), authAdminController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin']), authAdminController.remove)
 
 export default router

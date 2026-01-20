@@ -88,6 +88,34 @@ const create = async ({ email, password, user_metadata }) => {
 
 }
 
+const update = async ({ id, password, user_metadata }) => {
+    const { data: current, error: getError } =
+        await supabase.supabaseSuperAdmin.auth.admin.getUserById(id)
+
+    if (getError) throw getError
+
+    const payload = {}
+
+    if (password && password.trim() !== '') {
+        payload.password = password
+    }
+
+    // MERGE user_metadata
+    if (user_metadata && Object.keys(user_metadata).length > 0) {
+        payload.user_metadata = {
+            ...(current.user.user_metadata ?? {}),
+            ...user_metadata,
+        }
+    }
+
+    const { error } = await supabase.supabaseSuperAdmin.auth.admin.updateUserById(id, payload)
+    if (error) throw error
+
+    return getById(id)
+}
+
+
+
 const remove = async (userId) => {
     const { error: authError } =
         await supabase.supabaseSuperAdmin.auth.admin.deleteUser(userId)
@@ -133,5 +161,5 @@ const deactivateUser = async (userId) => {
 
 
 export const authAdminService = {
-    getAll, getById, create, remove, activateUser, deactivateUser
+    getAll, getById, create, update, remove, activateUser, deactivateUser
 }
