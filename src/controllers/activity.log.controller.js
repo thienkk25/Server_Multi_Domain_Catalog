@@ -3,5 +3,6 @@ import { handle } from '../utils/handle.helper.js'
 import qs from "qs"
 
 export const activityLogController = {
-    getAll: handle(req => activityLogService.getAll(qs.parse(req.query)))
+    getAll: handle(req => activityLogService.getAll(qs.parse(req.query))),
+    getById: handle(req => activityLogService.getById(req.params.id)),
 }

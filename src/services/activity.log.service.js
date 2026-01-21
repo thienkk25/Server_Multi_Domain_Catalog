@@ -59,6 +59,18 @@ const getAll = async (query) => {
     }
 }
 
+const getById = async (id) => {
+    const { data, error } = await supabase.supabaseClient
+        .from("activity_log")
+        .select("*")
+        .eq("id", id)
+        .single()
+
+    if (error) throw error
+
+    return data
+}
+
 export const activityLogService = {
-    getAll
+    getAll, getById
 }
