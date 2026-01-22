@@ -81,17 +81,25 @@ const signOut = async () => {
 }
 
 const refreshToken = async ({ refresh_token }) => {
-    const { data, error } = await supabase.supabaseClient.auth.refreshSession({
-        refresh_token: refresh_token
-    })
+    const { data, error } =
+        await supabase.supabaseClient.auth.refreshSession({
+            refresh_token,
+        })
 
     if (error) {
-        const err = new Error(error.message || 'refresh_token không hợp lệ')
-        err.status = 400
+        const err = new Error(
+            error.message || 'Refresh token không hợp lệ hoặc đã hết hạn'
+        )
+
+        err.status = 401
+        err.code = 'REFRESH_TOKEN_INVALID'
+
         throw err
     }
+
     return data
 }
+
 
 export const authService = {
     signInWithPassword, register, signOut, refreshToken

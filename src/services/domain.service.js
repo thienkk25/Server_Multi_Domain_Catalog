@@ -48,13 +48,32 @@ const getAll = async (query) => {
 
     if (error) throw error
 
+    const totalPages = Math.ceil(count / limit)
+
+    const hasMore = page * limit < count
+
+    if (page > totalPages && totalPages !== 0) {
+        return {
+            data: [],
+            pagination: {
+                page,
+                limit,
+                total: count,
+                total_pages: totalPages,
+                has_more: hasMore
+            },
+        }
+    }
+
+
     return {
         data,
         pagination: {
             page,
             limit,
             total: count,
-            totalPages: Math.ceil(count / limit),
+            total_pages: totalPages,
+            has_more: hasMore
         },
     }
 }
