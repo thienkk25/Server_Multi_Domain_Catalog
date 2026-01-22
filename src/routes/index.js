@@ -12,7 +12,7 @@ import catalogLookupRoutes from './catalog.lookup.routes.js'
 import activityLogRoutes from './activity.log.routes.js'
 import apiKeyRoutes from './api.key.routes.js'
 import officerDomainRoutes from './officer.domain.routes.js'
-import csvRoutes from "./csv.routes.js"
+import importRoutes from "./import.route.js"
 import { limiterMiddleware } from '../middlewares/limiter.middleware.js'
 
 const router = Router()
@@ -36,6 +36,6 @@ router.use('/officer-domain', officerDomainRoutes)
 router.use('/api-key', apiKeyRoutes)
 router.use('/activity-log', activityLogRoutes)
 
-router.use("/csv", csvRoutes);
+router.use("/import", importRoutes);
 
 export default router
