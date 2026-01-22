@@ -23,7 +23,7 @@ export const importCsvService = async (filePath, table) => {
         // Khi đủ batch → upsert lên Supabase
         if (batch.length >= batchSize) {
             const { error } = await supabase.supabaseClient
-                .from(table) // đổi tên bảng
+                .from(table) // tên bảng
                 .upsert(batch, { onConflict: "id" }) // cột unique
 
             if (error) throw error
