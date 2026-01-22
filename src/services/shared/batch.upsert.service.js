@@ -1,30 +1,27 @@
 import fs from 'fs';
 import { parse } from 'csv-parse';
-import { supabase } from '../../configs/supabase.js';
+import XLSX from 'xlsx';
 
-export const batchUpsert = async ({ filePath, table }) => {
-    const batchSize = 1000;
-    let batch = [];
-    let total = 0;
-
+export const parseCsv = async (filePath) => {
+    const rows = [];
     const parser = fs.createReadStream(filePath).pipe(
         parse({ columns: true, skip_empty_lines: true })
     );
 
-    for await (const row of parser) {
-        batch.push(row);
+    for await (const row of parser) rows.push(row);
+    return rows;
+};
 
-        if (batch.length >= batchSize) {
-            await supabase.supabaseClient.from(table).upsert(batch);
-            total += batch.length;
-            batch = [];
-        }
-    }
+export const parseXlsx = async (filePath) => {
+    const workbook = XLSX.readFile(filePath);
+    return XLSX.utils.sheet_to_json(
+        workbook.Sheets[workbook.SheetNames[0]],
+        { defval: null }
+    );
+};
 
-    if (batch.length) {
-        await supabase.supabaseClient.from(table).upsert(batch);
-        total += batch.length;
-    }
-
-    return { inserted: total };
+export const parseFileToRows = async (filePath) => {
+    if (filePath.endsWith('.csv')) return parseCsv(filePath);
+    if (filePath.endsWith('.xlsx')) return parseXlsx(filePath);
+    throw new Error('Unsupported file type');
 };
