@@ -115,7 +115,12 @@ const create = async (payload) => {
         .select()
         .single()
 
-    if (error) throw error
+    if (error) {
+        if (error.code === '23505') {
+            throw new Error('Mã hoặc tên mục danh mục đã tồn tại')
+        }
+        throw error
+    }
     return getById(data.id)
 }
 

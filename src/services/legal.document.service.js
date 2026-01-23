@@ -89,7 +89,12 @@ const create = async (payload, file) => {
         .select()
         .single()
 
-    if (error) throw error
+    if (error) {
+        if (error.code === '23505') {
+            throw new Error('Mã hoặc tên tài liệu đã tồn tại')
+        }
+        throw error
+    }
     return data
 }
 

@@ -74,7 +74,12 @@ const create = async (payload) => {
         .select()
         .single()
 
-    if (error) throw error
+    if (error) {
+        if (error.code === '23505') {
+            throw new Error('Tên Api Key đã tồn tại')
+        }
+        throw error
+    }
     return data
 }
 
