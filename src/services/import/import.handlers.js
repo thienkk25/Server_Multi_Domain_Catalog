@@ -1,4 +1,3 @@
-import { batchUpsert } from '../shared/batch.upsert.service.js';
 
 export const importDomainOnly = (filePath) =>
     batchUpsert({ filePath, table: 'domains' });
