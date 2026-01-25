@@ -1,0 +1,6 @@
+export const IMPORT_TYPE = {
+    DOMAIN: 1,
+    CATEGORY_GROUP: 2,
+    CATEGORY_ITEM: 3,
+    API_KEY: 4,
+};
