@@ -1,12 +1,11 @@
-
 export const importDomainOnly = (filePath) =>
-    batchUpsert({ filePath, table: 'domains' });
+    parseFileToRows({ filePath, table: 'domains' });
 
 export const importCategoryGroupOnly = (filePath) =>
-    batchUpsert({ filePath, table: 'category_groups' });
+    parseFileToRows({ filePath, table: 'category_groups' });
 
 export const importCategoryItemOnly = (filePath) =>
-    batchUpsert({ filePath, table: 'category_items' });
+    parseFileToRows({ filePath, table: 'category_items' });
 
 export const importApiKey = (filePath) =>
-    batchUpsert({ filePath, table: 'api_keys' });
+    parseFileToRows({ filePath, table: 'api_keys' });

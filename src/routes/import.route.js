@@ -1,16 +1,18 @@
-import express from 'express';
+import { Router } from "express";
+import { authMiddleware } from '../middlewares/auth.middleware.js'
+import { checkRole } from '../middlewares/role.middleware.js'
 import { uploadCsv } from '../middlewares/upload.middleware.js';
 import {
     importSingleController,
     importCatalogController,
 } from '../controllers/import.controller.js';
 
-const router = express.Router();
+const router = Router()
 
 // Import 1 bảng 
-router.post('/single', uploadCsv.single('file'), importSingleController);
+router.post('/single', authMiddleware, checkRole(['admin']), uploadCsv.single('file'), importSingleController);
 
 // Import domain + group + item chung
-router.post('/catalog', uploadCsv.single('file'), importCatalogController);
+router.post('/catalog', authMiddleware, checkRole(['admin']), uploadCsv.single('file'), importCatalogController);
 
 export default router;

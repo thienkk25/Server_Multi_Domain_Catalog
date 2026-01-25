@@ -1,10 +1,16 @@
-import { IMPORT_REGISTRY } from './import.registry.js';
+import { parseFileToRows } from '../../utils/file.parser.js';
+import { supabase } from '../../configs/supabase.js';
 
-export const importSingleService = async (filePath, type) => {
-    const handler = IMPORT_REGISTRY[type];
-    if (!handler) {
-        throw new Error('Invalid import type');
+export const importSingleService = async (filePath, table) => {
+    if (!table) {
+        throw new Error('Invalid import table');
     }
 
-    return handler(filePath);
+    const rows = await parseFileToRows(filePath);
+
+    await supabase.supabaseClient
+        .from(table)
+        .upsert(rows);
+
+    return { inserted: rows.length };
 };

@@ -1,17 +1,21 @@
 import multer from 'multer';
+import path from 'path';
 
 export const uploadCsv = multer({
-    dest: 'tmp/',
+    storage: multer.diskStorage({
+        destination: 'tmp/',
+        filename: (req, file, cb) => {
+            const ext = path.extname(file.originalname);
+            cb(null, `${Date.now()}${ext}`);
+        },
+    }),
     limits: { fileSize: 50 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        const allowed = [
-            'text/csv',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ];
-
-        if (!allowed.includes(file.mimetype)) {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (!['.csv', '.xlsx'].includes(ext)) {
             return cb(new Error('Chỉ hỗ trợ CSV hoặc XLSX'));
         }
         cb(null, true);
     },
 });
+
