@@ -13,4 +13,6 @@ router.post('/', authMiddleware, checkRole(['admin']), authAdminController.creat
 router.patch('/:id', authMiddleware, checkRole(['admin']), authAdminController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin']), authAdminController.remove)
 
+router.post('/grant-access', authMiddleware, checkRole(['admin']), authAdminController.grantUserAccess)
+
 export default router

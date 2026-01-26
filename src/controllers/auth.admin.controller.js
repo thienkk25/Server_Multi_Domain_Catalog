@@ -93,6 +93,17 @@ const deactivateUser = async (req, res, next) => {
     }
 }
 
+const grantUserAccess = async (req, res, next) => {
+    try {
+        const { user_id, role_id, domain_ids } = req.body
+        const result = await authAdminService.grantUserAccess(user_id, role_id, domain_ids)
+
+        res.json({ success: true, data: result })
+    } catch (error) {
+        next(error)
+    }
+}
+
 export const authAdminController = {
-    getAll, getById, create, update, remove, activateUser, deactivateUser
+    getAll, getById, create, update, remove, activateUser, deactivateUser, grantUserAccess
 }

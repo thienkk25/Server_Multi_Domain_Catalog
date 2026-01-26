@@ -6,8 +6,8 @@ import { apiKeyController } from "../controllers/api.key.controller.js";
 
 const router = Router()
 
-router.get('/', apiKeyController.getAll)
-router.get('/:id', apiKeyController.getById)
+router.get('/', authMiddleware, checkRole(['admin']), apiKeyController.getAll)
+router.get('/:id', authMiddleware, checkRole(['admin']), apiKeyController.getById)
 
 router.post('/', authMiddleware, checkRole(['admin']), apiKeyController.create)
 router.post('/bulk', authMiddleware, checkRole(['admin']), apiKeyController.createMany)

@@ -159,7 +159,56 @@ const deactivateUser = async (userId) => {
 
 }
 
+const grantUserAccess = async (userId, roleId, domainIds = []) => {
+    if (!userId || !roleId) {
+        throw new Error('Dữ liệu không hợp lệ')
+    }
+
+    // Update role
+    const { error: roleError } = await supabase
+        .from('user_role')
+        .update({ role_id: roleId })
+        .eq('user_id', userId)
+
+    if (roleError) throw roleError
+
+    // Nếu KHÔNG phải domainOfficer → xoá domain
+    if (roleId !== 3) {
+        await supabase
+            .from('officer_domain')
+            .delete()
+            .eq('user_id', userId)
+        return
+    }
+
+    // DomainOfficer → cần >= 1 domain
+    if (!Array.isArray(domainIds) || domainIds.length === 0) {
+        throw new Error('Người dùng có vai trò Cán bộ chuyên môn phải quản lý tối thiểu một lĩnh vực')
+    }
+
+    // Reset domain cũ
+    await supabase
+        .from('officer_domain')
+        .delete()
+        .eq('user_id', userId)
+
+    // Insert nhiều domain
+    const payload = domainIds.map(domainId => ({
+        user_id: userId,
+        domain_id: domainId
+    }))
+
+    const { error: domainError } = await supabase
+        .from('officer_domain')
+        .insert(payload)
+
+    if (domainError) throw domainError
+
+    return getById(userId)
+}
+
+
 
 export const authAdminService = {
-    getAll, getById, create, update, remove, activateUser, deactivateUser
+    getAll, getById, create, update, remove, activateUser, deactivateUser, grantUserAccess
 }
