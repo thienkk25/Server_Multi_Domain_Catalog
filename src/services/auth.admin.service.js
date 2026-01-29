@@ -165,7 +165,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
     }
 
     // Update role
-    const { error: roleError } = await supabase
+    const { error: roleError } = await supabase.supabaseSuperAdmin
         .from('user_role')
         .update({ role_id: roleId })
         .eq('user_id', userId)
@@ -174,11 +174,12 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
 
     // Nếu KHÔNG phải domainOfficer → xoá domain
     if (roleId !== 3) {
-        await supabase
+        await supabase.supabaseSuperAdmin
             .from('officer_domain')
             .delete()
             .eq('user_id', userId)
-        return
+
+        return getById(userId)
     }
 
     // DomainOfficer → cần >= 1 domain
@@ -187,7 +188,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
     }
 
     // Reset domain cũ
-    await supabase
+    await supabase.supabaseSuperAdmin
         .from('officer_domain')
         .delete()
         .eq('user_id', userId)
@@ -198,7 +199,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
         domain_id: domainId
     }))
 
-    const { error: domainError } = await supabase
+    const { error: domainError } = await supabase.supabaseSuperAdmin
         .from('officer_domain')
         .insert(payload)
 
