@@ -10,7 +10,7 @@ const changePassword = async ({ new_password }) => {
     }
 
 
-    const { data, error } = await supabase.supabaseClient.auth.updateUser({
+    const { error } = await supabase.supabaseClient.auth.updateUser({
         password: new_password
     });
 
@@ -18,7 +18,7 @@ const changePassword = async ({ new_password }) => {
         throw error
     }
 
-    return data
+    return getProfile()
 }
 
 const updateProfile = async ({ phone, full_name }) => {
@@ -40,7 +40,7 @@ const updateProfile = async ({ phone, full_name }) => {
         throw new Error('No data to update')
     }
 
-    const { data, error } = await supabase.supabaseClient.auth.updateUser({
+    const { error } = await supabase.supabaseClient.auth.updateUser({
         data: payload
     })
 
@@ -48,16 +48,7 @@ const updateProfile = async ({ phone, full_name }) => {
         throw error
     }
 
-    return data
-}
-
-
-const me = async () => {
-    const { data, error } = await supabase.supabaseClient.auth.getUser()
-    if (error) {
-        throw error
-    }
-    return data
+    return getProfile()
 }
 
 const getProfile = async () => {
@@ -85,5 +76,5 @@ const role = async (id) => {
 }
 
 export const userService = {
-    changePassword, updateProfile, me, getProfile, role
+    changePassword, updateProfile, getProfile, role
 }

@@ -23,18 +23,6 @@ const updateProfile = async (req, res, next) => {
     }
 }
 
-const me = async (req, res, next) => {
-    try {
-        const result = await userService.me()
-        res.json({
-            success: true,
-            data: result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
 const getProfile = async (req, res, next) => {
     try {
         const result = await userService.getProfile()
@@ -60,5 +48,5 @@ const role = async (req, res, next) => {
 }
 
 export const userController = {
-    changePassword, updateProfile, me, getProfile, role
+    changePassword, updateProfile, getProfile, role
 }

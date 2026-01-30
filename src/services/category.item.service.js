@@ -7,27 +7,8 @@ const getAll = async (query) => {
 
     // Khởi tạo query builder
     let qb = supabase.supabaseClient
-        .from("category_item")
-        .select(`id,
-                code,
-                name,
-                description,
-                status,
-                group:group_id (
-                    id,
-                    code,
-                    name,
-                    domain:domain_id (
-                        id,
-                        code,
-                        name
-                    )
-                ),
-                created_by,
-                updated_by,
-                created_at,
-                updated_at
-                `, { count: "exact" });
+        .from("category_item_view")
+        .select("*", { count: "exact" });
 
     if (query.search) {
         const s = query.search;
@@ -80,26 +61,8 @@ const getAll = async (query) => {
 
 const getById = async (id) => {
     const { data: category_item, error } = await supabase.supabaseClient
-        .from('category_item')
-        .select(`id,
-                code,
-                name,
-                description,
-                status,
-                group:group_id (
-                    id,
-                    code,
-                    name,
-                    domain:domain_id (
-                        id,
-                        code,
-                        name
-                    )
-                ),
-                created_by,
-                updated_by,
-                created_at,
-                updated_at`)
+        .from('category_item_view')
+        .select('*')
         .eq('id', id)
         .single()
 
@@ -108,10 +71,13 @@ const getById = async (id) => {
     return category_item
 }
 
-const create = async (payload) => {
+const create = async ({
+    category_item,
+    legal_document_ids = []
+}) => {
     const { data, error } = await supabase.supabaseClient
         .from('category_item')
-        .insert(payload)
+        .insert(category_item)
         .select()
         .single()
 
@@ -121,6 +87,14 @@ const create = async (payload) => {
         }
         throw error
     }
+
+    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
+        p_item_id: data.id,
+        p_legal_ids: legal_document_ids
+    })
+
+    if (error_legal_document_ids) throw error
+
     return getById(data.id)
 }
 
@@ -144,15 +118,26 @@ const upsertMany = async (items) => {
     return data
 }
 
-const update = async (id, payload) => {
+const update = async ({
+    category_item,
+    legal_document_ids = []
+}) => {
     const { data, error } = await supabase.supabaseClient
         .from('category_item')
-        .update(payload)
-        .eq('id', id)
+        .update(category_item)
+        .eq('id', category_item.id)
         .select()
         .single();
 
     if (error) throw error;
+
+    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
+        p_item_id: data.id,
+        p_legal_ids: legal_document_ids
+    })
+
+    if (error_legal_document_ids) throw error
+
     return getById(data.id);
 }
 
