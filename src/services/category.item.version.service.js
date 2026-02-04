@@ -63,48 +63,95 @@ const getById = async (id) => {
     return category_item_version
 }
 
-const create = async (payload) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item_version')
-        .insert(payload)
-        .select()
-        .single()
+// domain officer 
+
+const createVersion = async ({
+    version_data,
+    legal_document_ids = []
+}) => {
+    const { data: versionId, error } = await supabase.supabaseClient
+        .rpc(
+            'do_create_category_item_version',
+            { p_new_data: version_data }
+        )
 
     if (error) throw error
-    return data
+
+    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
+        p_item_id: versionId,
+        p_legal_ids: legal_document_ids
+    })
+
+    if (error_legal_document_ids) throw error
+
+    return getById(versionId)
 }
 
-const createMany = async (payloadList) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item_version')
-        .insert(payloadList)
-        .select()
+const updateVersion = async (id, {
+    version_data,
+    legal_document_ids = []
+}) => {
+    const { error } = await supabase.supabaseClient
+        .rpc(
+            'do_update_category_item_version',
+            {
+                p_item_id: id,
+                p_new_data: version_data
+            }
+        )
 
     if (error) throw error
-    return data
+
+    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
+        p_item_id: id,
+        p_legal_ids: legal_document_ids
+    })
+
+    if (error_legal_document_ids) throw error
+
+    return getById(id);
 }
 
-const upsertMany = async (items) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item_version')
-        .upsert(items, { onConflict: 'id' })
-        .select()
+const deleteVersion = async (id) => {
+    const { error } = await supabase.supabaseClient
+        .rpc(
+            'do_delete_category_item_version',
+            { p_item_id: id }
+        )
 
     if (error) throw error
-    return data
 }
 
-const update = async (id, payload) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item_version')
-        .update(payload)
-        .eq('id', id)
-        .select()
-        .single();
+// approver
+
+const approveVersion = async (id) => {
+    const { error } = await supabase.supabaseClient
+        .rpc(
+            'approve_category_item_version',
+            { p_version_id: id }
+        )
 
     if (error) throw error;
-    return data;
+
+    return getById(id)
 }
+
+const rejectVersion = async (id, rejectReason) => {
+    const { error } = await supabase.supabaseClient
+        .rpc(
+            'reject_category_item_version',
+            {
+                p_version_id: id,
+                p_reject_reason: rejectReason
+            }
+        )
+
+    if (error) throw error;
+
+    return getById(id)
+}
+
+// admin
 
 const remove = async (id) => {
     const { error } = await supabase.supabaseClient
@@ -116,5 +163,5 @@ const remove = async (id) => {
 }
 
 export const categoryItemVersionService = {
-    getAll, getById, create, createMany, upsertMany, update, remove
+    getAll, getById, createVersion, updateVersion, deleteVersion, approveVersion, rejectVersion, remove
 }

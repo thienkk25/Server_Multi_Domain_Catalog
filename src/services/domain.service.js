@@ -106,26 +106,6 @@ const create = async (payload) => {
     return data
 }
 
-const createMany = async (payloadList) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('domain')
-        .insert(payloadList)
-        .select()
-
-    if (error) throw error
-    return data
-}
-
-const upsertMany = async (items) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('domain')
-        .upsert(items, { onConflict: 'id' })
-        .select()
-
-    if (error) throw error
-    return data
-}
-
 const update = async (id, payload) => {
     const { data, error } = await supabase.supabaseClient
         .from('domain')
@@ -148,5 +128,5 @@ const remove = async (id) => {
 }
 
 export const domainService = {
-    getAll, getById, create, createMany, upsertMany, update, remove
+    getAll, getById, create, update, remove
 }

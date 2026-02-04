@@ -98,26 +98,6 @@ const create = async (payload, file) => {
     return data
 }
 
-const createMany = async (payloadList) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('legal_document')
-        .insert(payloadList)
-        .select()
-
-    if (error) throw error
-    return data
-}
-
-const upsertMany = async (items) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('legal_document')
-        .upsert(items, { onConflict: 'id' })
-        .select()
-
-    if (error) throw error
-    return data
-}
-
 const update = async (id, payload, file) => {
     const { data: oldDoc, error: fetchError } = await supabase.supabaseClient
         .from('legal_document')
@@ -291,5 +271,5 @@ const getLegalDocumentsWithFile = async (query) => {
 
 
 export const legalDocumentService = {
-    getAll, getById, create, createMany, upsertMany, update, remove, getSignedUrl, getLegalDocumentsWithFile
+    getAll, getById, create, update, remove, getSignedUrl, getLegalDocumentsWithFile
 }

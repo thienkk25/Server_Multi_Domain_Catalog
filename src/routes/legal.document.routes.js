@@ -17,9 +17,6 @@ router.get('/:id', legalDocumentController.getById)
 router.get('/documents/with-file', legalDocumentController.getLegalDocumentsWithFile)
 
 router.post('/', authMiddleware, checkRole(['admin']), upload.single('file'), legalDocumentController.create)
-router.post('/bulk', authMiddleware, checkRole(['admin']), legalDocumentController.createMany)
-
-router.post('/bulk/upsert', authMiddleware, checkRole(['admin']), legalDocumentController.upsertMany)
 
 router.patch('/:id', authMiddleware, checkRole(['admin']), upload.single('file'), legalDocumentController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin']), legalDocumentController.remove)

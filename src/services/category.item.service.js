@@ -75,11 +75,13 @@ const create = async ({
     category_item,
     legal_document_ids = []
 }) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item')
-        .insert(category_item)
-        .select()
-        .single()
+    const { data: item_id, error } = await supabase.supabaseClient
+        .rpc(
+            'admin_create_item',
+            {
+                p_data: category_item
+            }
+        )
 
     if (error) {
         if (error.code === '23505') {
@@ -89,56 +91,38 @@ const create = async ({
     }
 
     const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
-        p_item_id: data.id,
+        p_item_id: item_id,
         p_legal_ids: legal_document_ids
     })
 
     if (error_legal_document_ids) throw error
 
-    return getById(data.id)
+    return getById(item_id)
 }
 
-const createMany = async (payloadList) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item')
-        .insert(payloadList)
-        .select()
-
-    if (error) throw error
-    return data
-}
-
-const upsertMany = async (items) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item')
-        .upsert(items, { onConflict: 'id' })
-        .select()
-
-    if (error) throw error
-    return data
-}
-
-const update = async ({
+const update = async (id, {
     category_item,
     legal_document_ids = []
 }) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_item')
-        .update(category_item)
-        .eq('id', category_item.id)
-        .select()
-        .single();
+    const { error } = await supabase.supabaseClient
+        .rpc(
+            'admin_update_item',
+            {
+                p_item_id: id,
+                p_new_value: category_item
+            }
+        )
 
     if (error) throw error;
 
     const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
-        p_item_id: data.id,
+        p_item_id: id,
         p_legal_ids: legal_document_ids
     })
 
     if (error_legal_document_ids) throw error
 
-    return getById(data.id);
+    return getById(id);
 }
 
 const remove = async (id) => {
@@ -151,5 +135,5 @@ const remove = async (id) => {
 }
 
 export const categoryItemService = {
-    getAll, getById, create, createMany, upsertMany, update, remove
+    getAll, getById, create, update, remove
 }

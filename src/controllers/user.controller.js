@@ -25,7 +25,7 @@ const updateProfile = async (req, res, next) => {
 
 const getProfile = async (req, res, next) => {
     try {
-        const result = await userService.getProfile()
+        const result = await userService.getProfile(req.user.id)
         res.json({
             success: true,
             data: result
@@ -37,7 +37,7 @@ const getProfile = async (req, res, next) => {
 
 const role = async (req, res, next) => {
     try {
-        const result = await userService.role(req.user.id)
+        const result = await userService.role()
         res.json({
             success: true,
             data: result

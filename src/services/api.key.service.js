@@ -83,26 +83,6 @@ const create = async (payload) => {
     return data
 }
 
-const createMany = async (payloadList) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('api_key')
-        .insert(payloadList)
-        .select()
-
-    if (error) throw error
-    return data
-}
-
-const upsertMany = async (items) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('api_key')
-        .upsert(items, { onConflict: 'id' })
-        .select()
-
-    if (error) throw error
-    return data
-}
-
 const update = async (id, payload) => {
     const { data, error } = await supabase.supabaseClient
         .from('api_key')
@@ -125,5 +105,5 @@ const remove = async (id) => {
 }
 
 export const apiKeyService = {
-    getAll, getById, create, createMany, upsertMany, update, remove
+    getAll, getById, create, update, remove
 }

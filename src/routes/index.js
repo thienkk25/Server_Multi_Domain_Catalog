@@ -7,7 +7,6 @@ import categoryGroupRoutes from './category.group.routes.js'
 import categoryItemRoutes from './category.item.routes.js'
 import legalDocumentRoutes from './legal.document.routes.js'
 import categoryItemVersionRoutes from './category.item.version.routes.js'
-import categoryItemLegalRefRoutes from './category.item.legal.ref.routes.js'
 import catalogLookupRoutes from './catalog.lookup.routes.js'
 import activityLogRoutes from './activity.log.routes.js'
 import apiKeyRoutes from './api.key.routes.js'
@@ -28,7 +27,6 @@ router.use('/category-group', categoryGroupRoutes)
 router.use('/category-item', categoryItemRoutes)
 router.use('/legal-document', legalDocumentRoutes)
 router.use('/category-item-version', categoryItemVersionRoutes)
-router.use('/category-item-legal-ref', categoryItemLegalRefRoutes)
 router.use('/catalog-lookup', catalogLookupRoutes)
 
 router.use('/api-key', apiKeyRoutes)

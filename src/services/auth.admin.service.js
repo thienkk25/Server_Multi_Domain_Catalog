@@ -7,7 +7,7 @@ const getAll = async (query) => {
 
     // Khởi tạo query builder
     let qb = supabase.supabaseSuperAdmin
-        .from("admin_user_list")
+        .from("profile")
         .select("*", { count: "exact" })
 
 
@@ -62,7 +62,7 @@ const getAll = async (query) => {
 
 const getById = async (id) => {
     const { data, error } = await supabase.supabaseSuperAdmin
-        .from("admin_user_list")
+        .from("profile")
         .select("*")
         .eq("id", id)
         .maybeSingle()

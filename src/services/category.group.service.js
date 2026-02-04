@@ -87,26 +87,6 @@ const create = async (payload) => {
     return data
 }
 
-const createMany = async (payloadList) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_group')
-        .insert(payloadList)
-        .select()
-
-    if (error) throw error
-    return data
-}
-
-const upsertMany = async (items) => {
-    const { data, error } = await supabase.supabaseClient
-        .from('category_group')
-        .upsert(items, { onConflict: 'id' })
-        .select()
-
-    if (error) throw error
-    return data
-}
-
 const update = async (id, payload) => {
     const { data, error } = await supabase.supabaseClient
         .from('category_group')
@@ -129,5 +109,5 @@ const remove = async (id) => {
 }
 
 export const categoryGroupService = {
-    getAll, getById, create, createMany, upsertMany, update, remove
+    getAll, getById, create, update, remove
 }

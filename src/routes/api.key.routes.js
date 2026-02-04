@@ -10,9 +10,6 @@ router.get('/', authMiddleware, checkRole(['admin']), apiKeyController.getAll)
 router.get('/:id', authMiddleware, checkRole(['admin']), apiKeyController.getById)
 
 router.post('/', authMiddleware, checkRole(['admin']), apiKeyController.create)
-router.post('/bulk', authMiddleware, checkRole(['admin']), apiKeyController.createMany)
-
-router.post('/bulk/upsert', authMiddleware, checkRole(['admin']), apiKeyController.upsertMany)
 
 router.patch('/:id', authMiddleware, checkRole(['admin']), apiKeyController.update)
 router.delete('/:id', authMiddleware, checkRole(['admin']), apiKeyController.remove)

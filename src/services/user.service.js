@@ -51,10 +51,11 @@ const updateProfile = async ({ phone, full_name }) => {
     return getProfile()
 }
 
-const getProfile = async () => {
-    const { data, error } = await supabase.supabaseClient
+const getProfile = async (id) => {
+    const { data, error } = await supabase.supabaseSuperAdmin
         .from('profile')
         .select('*')
+        .eq('id', id)
         .maybeSingle()
 
     if (error) {
@@ -63,11 +64,10 @@ const getProfile = async () => {
     return data
 }
 
-const role = async (id) => {
-    const { data: userRole, error } = await supabase.supabaseSuperAdmin
+const role = async () => {
+    const { data: userRole, error } = await supabase.supabaseClient
         .from("user_role")
         .select("role:role_id(*)")
-        .eq("user_id", id)
         .maybeSingle()
     if (error) {
         throw error

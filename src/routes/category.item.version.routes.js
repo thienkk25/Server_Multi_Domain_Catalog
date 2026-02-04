@@ -9,12 +9,16 @@ const router = Router()
 router.get('/', categoryItemVersionController.getAll)
 router.get('/:id', categoryItemVersionController.getById)
 
-router.post('/', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemVersionController.create)
-router.post('/bulk', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemVersionController.createMany)
+// domain officer
+router.post('/', authMiddleware, checkRole(['domainOfficer']), categoryItemVersionController.createVersion)
+router.post('/:id', authMiddleware, checkRole(['domainOfficer']), categoryItemVersionController.updateVersion)
+router.post('/:id', authMiddleware, checkRole(['domainOfficer']), categoryItemVersionController.deleteVersion)
 
-router.post('/bulk/upsert', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemVersionController.upsertMany)
+// approver
+router.post('/:id', authMiddleware, checkRole(['approver']), categoryItemVersionController.approveVersion)
+router.post('/:id', authMiddleware, checkRole(['approver']), categoryItemVersionController.rejectVersion)
 
-router.patch('/:id', authMiddleware, checkRole(['admin', 'approver']), categoryItemVersionController.update)
+// admin
 router.delete('/:id', authMiddleware, checkRole(['admin']), categoryItemVersionController.remove)
 
 export default router

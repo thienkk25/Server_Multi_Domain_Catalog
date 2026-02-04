@@ -9,12 +9,9 @@ const router = Router()
 router.get('/', categoryItemController.getAll)
 router.get('/:id', categoryItemController.getById)
 
-router.post('/', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemController.create)
-router.post('/bulk', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemController.createMany)
+router.post('/', authMiddleware, checkRole(['admin']), categoryItemController.create)
 
-router.post('/bulk/upsert', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemController.upsertMany)
-
-router.patch('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemController.update)
-router.delete('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemController.remove)
+router.patch('/:id', authMiddleware, checkRole(['admin']), categoryItemController.update)
+router.delete('/:id', authMiddleware, checkRole(['admin']), categoryItemController.remove)
 
 export default router
