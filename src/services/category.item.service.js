@@ -64,7 +64,7 @@ const getById = async (id) => {
         .from('category_item_view')
         .select('*')
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
     if (error) throw error
 

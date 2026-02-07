@@ -8,7 +8,8 @@ const getAll = async (query) => {
     // Khởi tạo query builder
     let qb = supabase.supabaseClient
         .from("category_item_version")
-        .select("*", { count: "exact" });
+        .select("*", { count: "exact" })
+        .eq('item_id', query.item_id);
 
     if (query.filter) {
         for (const key in query.filter) {
@@ -56,7 +57,7 @@ const getById = async (id) => {
         .from('category_item_version')
         .select('*')
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
     if (error) throw error
 

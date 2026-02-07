@@ -173,7 +173,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
     if (roleError) throw roleError
 
     // Nếu KHÔNG phải domainOfficer → xoá domain
-    if (roleId !== 3) {
+    if (roleId == 1) {
         await supabase.supabaseSuperAdmin
             .from('officer_domain')
             .delete()
@@ -184,7 +184,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
 
     // DomainOfficer → cần >= 1 domain
     if (!Array.isArray(domainIds) || domainIds.length === 0) {
-        throw new Error('Người dùng có vai trò Cán bộ chuyên môn phải quản lý tối thiểu một lĩnh vực')
+        throw new Error('Người dùng có vai trò Cán bộ chuyên môn hoặc Chuyên viên duyệt phải quản lý tối thiểu một lĩnh vực')
     }
 
     // Reset domain cũ
