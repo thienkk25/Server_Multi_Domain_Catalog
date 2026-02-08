@@ -18,7 +18,7 @@ router.post('/:id/delete', authMiddleware, checkRole(['domainOfficer']), categor
 router.post('/:id/approve', authMiddleware, checkRole(['approver']), categoryItemVersionController.approveVersion)
 router.post('/:id/reject', authMiddleware, checkRole(['approver']), categoryItemVersionController.rejectVersion)
 
-// admin
-router.delete('/:id', authMiddleware, checkRole(['admin']), categoryItemVersionController.remove)
+// admin or domain officer with status = pending
+router.delete('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemVersionController.remove)
 
 export default router

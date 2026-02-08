@@ -106,14 +106,17 @@ const updateVersion = async (id, {
 
     if (error) throw error
 
-    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
-        p_item_id: id,
-        p_legal_ids: legal_document_ids
-    })
+    const { error: error_legal_document_ids } = await supabase.supabaseClient
+        .rpc('update_category_item_legals', {
+            p_item_id: id,
+            p_legal_ids: legal_document_ids
+        })
 
     if (error_legal_document_ids) throw error
 
-    return getById(id);
+    console.log(id)
+
+    return getById(id)
 }
 
 const deleteVersion = async (id) => {
@@ -155,7 +158,7 @@ const rejectVersion = async (id, rejectReason) => {
     return getById(id)
 }
 
-// admin
+// admin or domain officer with status = pending
 
 const remove = async (id) => {
     const { error } = await supabase.supabaseClient
