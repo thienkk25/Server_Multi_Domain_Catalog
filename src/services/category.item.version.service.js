@@ -9,7 +9,10 @@ const getAll = async (query) => {
     let qb = supabase.supabaseClient
         .from("category_item_version")
         .select("*", { count: "exact" })
-        .eq('item_id', query.item_id);
+
+    if (query.item_id) {
+        qb = qb.eq("item_id", query.item_id)
+    }
 
     if (query.filter) {
         for (const key in query.filter) {
