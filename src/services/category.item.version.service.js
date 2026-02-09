@@ -55,56 +55,77 @@ const getAll = async (query) => {
     }
 }
 
-const getById = async (id) => {
-    const { data: category_item_version, error } = await supabase.supabaseClient
+const getVersionById = async (id) => {
+    const { data, error } = await supabase.supabaseClient
         .from('category_item_version')
         .select('*')
         .eq('id', id)
         .maybeSingle()
 
     if (error) throw error
-
-    return category_item_version
+    return data
 }
 
 // domain officer 
 
-const createVersion = async ({
+const createVersion = async (user_id, {
     version_data,
     legal_document_ids = []
 }) => {
+    console.log(user_id)
     const { data: versionId, error } = await supabase.supabaseClient
         .rpc(
             'do_create_category_item_version',
-            { p_new_data: version_data }
-        )
-
-    if (error) throw error
-
-    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
-        p_item_id: versionId,
-        p_legal_ids: legal_document_ids
-    })
-
-    if (error_legal_document_ids) throw error
-
-    return getById(versionId)
-}
-
-const updateVersion = async (id, {
-    version_data,
-    legal_document_ids = []
-}) => {
-    const { error } = await supabase.supabaseClient
-        .rpc(
-            'do_update_category_item_version',
             {
-                p_item_id: id,
-                p_new_data: version_data
+                p_new_data: version_data,
+                p_user_id: user_id
             }
         )
 
     if (error) throw error
+
+    const { error: error_legal_document_ids } = await supabase.supabaseClient
+        .rpc('update_category_item_legals', {
+            p_item_id: versionId,
+            p_legal_ids: legal_document_ids
+        })
+
+    if (error_legal_document_ids) throw error
+
+    return getVersionById(versionId)
+}
+
+const updateVersion = async (id, user_id, {
+    type = 0,
+    version_data,
+    legal_document_ids = []
+}) => {
+
+    if (type == 0) {
+        const { error } = await supabase.supabaseClient
+            .rpc(
+                'do_update_category_item_version',
+                {
+                    p_item_id: id,
+                    p_new_data: version_data,
+                    p_user_id: user_id
+                }
+            )
+
+        if (error) throw error
+
+    } else {
+        const { error } = await supabase.supabaseClient
+            .from('category_item_version',)
+            .update({
+                'new_value': version_data,
+                'changed_by': user_id
+            })
+            .eq('id', version_data.id)
+
+        if (error) throw error
+
+    }
 
     const { error: error_legal_document_ids } = await supabase.supabaseClient
         .rpc('update_category_item_legals', {
@@ -114,16 +135,17 @@ const updateVersion = async (id, {
 
     if (error_legal_document_ids) throw error
 
-    console.log(id)
-
-    return getById(id)
+    return getVersionById(id)
 }
 
-const deleteVersion = async (id) => {
+const deleteVersion = async (id, user_id) => {
     const { error } = await supabase.supabaseClient
         .rpc(
             'do_delete_category_item_version',
-            { p_item_id: id }
+            {
+                p_item_id: id,
+                p_user_id: user_id
+            }
         )
 
     if (error) throw error
@@ -140,7 +162,7 @@ const approveVersion = async (id) => {
 
     if (error) throw error;
 
-    return getById(id)
+    return getVersionById(id)
 }
 
 const rejectVersion = async (id, rejectReason) => {
@@ -155,7 +177,7 @@ const rejectVersion = async (id, rejectReason) => {
 
     if (error) throw error;
 
-    return getById(id)
+    return getVersionById(id)
 }
 
 // admin or domain officer with status = pending
@@ -170,5 +192,5 @@ const remove = async (id) => {
 }
 
 export const categoryItemVersionService = {
-    getAll, getById, createVersion, updateVersion, deleteVersion, approveVersion, rejectVersion, remove
+    getAll, getVersionById, createVersion, updateVersion, deleteVersion, approveVersion, rejectVersion, remove
 }

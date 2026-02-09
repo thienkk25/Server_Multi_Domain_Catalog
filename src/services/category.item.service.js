@@ -90,10 +90,11 @@ const create = async ({
         throw error
     }
 
-    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
-        p_item_id: item_id,
-        p_legal_ids: legal_document_ids
-    })
+    const { error: error_legal_document_ids } = await supabase.supabaseClient
+        .rpc('update_category_item_legals', {
+            p_item_id: item_id,
+            p_legal_ids: legal_document_ids
+        })
 
     if (error_legal_document_ids) throw error
 
@@ -115,10 +116,11 @@ const update = async (id, {
 
     if (error) throw error;
 
-    const { error: error_legal_document_ids } = await supabase.supabaseClient.rpc('update_category_item_legals', {
-        p_item_id: id,
-        p_legal_ids: legal_document_ids
-    })
+    const { error: error_legal_document_ids } = await supabase.supabaseClient
+        .rpc('update_category_item_legals', {
+            p_item_id: id,
+            p_legal_ids: legal_document_ids
+        })
 
     if (error_legal_document_ids) throw error
 
