@@ -72,7 +72,6 @@ const createVersion = async (user_id, {
     version_data,
     legal_document_ids = []
 }) => {
-    console.log(user_id)
     const { data: versionId, error } = await supabase.supabaseClient
         .rpc(
             'do_create_category_item_version',
@@ -85,8 +84,8 @@ const createVersion = async (user_id, {
     if (error) throw error
 
     const { error: error_legal_document_ids } = await supabase.supabaseClient
-        .rpc('update_category_item_legals', {
-            p_item_id: versionId,
+        .rpc('update_category_item_version_legals', {
+            p_version_id: versionId,
             p_legal_ids: legal_document_ids
         })
 
@@ -100,46 +99,31 @@ const updateVersion = async (id, user_id, {
     version_data,
     legal_document_ids = []
 }) => {
+    const { data: versionId, error } = await supabase.supabaseClient
+        .rpc(
+            'do_update_category_item_version',
+            {
+                p_item_id: id,
+                p_new_data: version_data,
+                p_user_id: user_id
+            }
+        )
 
-    if (type == 0) {
-        const { error } = await supabase.supabaseClient
-            .rpc(
-                'do_update_category_item_version',
-                {
-                    p_item_id: id,
-                    p_new_data: version_data,
-                    p_user_id: user_id
-                }
-            )
-
-        if (error) throw error
-
-    } else {
-        const { error } = await supabase.supabaseClient
-            .from('category_item_version',)
-            .update({
-                'new_value': version_data,
-                'changed_by': user_id
-            })
-            .eq('id', version_data.id)
-
-        if (error) throw error
-
-    }
+    if (error) throw error
 
     const { error: error_legal_document_ids } = await supabase.supabaseClient
-        .rpc('update_category_item_legals', {
-            p_item_id: id,
+        .rpc('update_category_item_version_legals', {
+            p_version_id: versionId,
             p_legal_ids: legal_document_ids
         })
 
     if (error_legal_document_ids) throw error
 
-    return getVersionById(id)
+    return getVersionById(versionId)
 }
 
 const deleteVersion = async (id, user_id) => {
-    const { error } = await supabase.supabaseClient
+    const { data: versionId, error } = await supabase.supabaseClient
         .rpc(
             'do_delete_category_item_version',
             {
@@ -149,6 +133,8 @@ const deleteVersion = async (id, user_id) => {
         )
 
     if (error) throw error
+
+    return getVersionById(versionId)
 }
 
 // approver
