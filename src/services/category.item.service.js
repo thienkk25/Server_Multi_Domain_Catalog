@@ -71,7 +71,7 @@ const getById = async (id) => {
     return category_item
 }
 
-const create = async ({
+const create = async (user_id, {
     category_item,
     legal_document_ids = []
 }) => {
@@ -79,7 +79,8 @@ const create = async ({
         .rpc(
             'admin_create_item',
             {
-                p_data: category_item
+                p_data: category_item,
+                user_id: user_id
             }
         )
 
@@ -101,7 +102,7 @@ const create = async ({
     return getById(item_id)
 }
 
-const update = async (id, {
+const update = async (id, user_id, {
     category_item,
     legal_document_ids = []
 }) => {
@@ -110,7 +111,8 @@ const update = async (id, {
             'admin_update_item',
             {
                 p_item_id: id,
-                p_new_value: category_item
+                p_new_value: category_item,
+                user_id: user_id
             }
         )
 
