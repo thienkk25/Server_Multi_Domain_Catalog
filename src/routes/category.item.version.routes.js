@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authOptional } from '../middlewares/auth.optional.js'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { checkRole } from '../middlewares/role.middleware.js'
 import { categoryItemVersionController } from "../controllers/category.item.version.controller.js";
@@ -6,7 +7,7 @@ import { categoryItemVersionController } from "../controllers/category.item.vers
 
 const router = Router()
 
-router.get('/', categoryItemVersionController.getAll)
+router.get('/', authOptional, categoryItemVersionController.getAll)
 router.get('/:id', categoryItemVersionController.getById)
 
 // domain officer
@@ -20,5 +21,8 @@ router.post('/:id/reject', authMiddleware, checkRole(['approver']), categoryItem
 
 // admin or domain officer with status = pending
 router.delete('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemVersionController.remove)
+
+// admin
+router.post('/:id/rollback', authMiddleware, checkRole(['admin']), categoryItemVersionController.rollbackVersion)
 
 export default router

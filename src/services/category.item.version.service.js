@@ -1,14 +1,22 @@
 import { supabase } from '../configs/supabase.js'
 
-const getAll = async (query) => {
+const getAll = async (user, query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
 
     // Khởi tạo query builder
-    let qb = supabase.supabaseClient
-        .from("category_item_version")
-        .select("*", { count: "exact" })
+    let qb
+    if (user != null) {
+        qb = supabase.supabaseClient
+            .from("category_item_version")
+            .select("*", { count: "exact" })
+    }
+    else {
+        qb = supabase.supabaseClient
+            .from("category_item_version_public")
+            .select("*", { count: "exact" })
+    }
 
     if (query.item_id) {
         qb = qb.eq("item_id", query.item_id)
@@ -202,6 +210,16 @@ const remove = async (id) => {
     if (error) throw error
 }
 
+const rollbackVersion = async (id) => {
+    const { error } = await supabase.supabaseClient
+        .rpc(
+            'rollback_category_item_version',
+            { p_version_id: id }
+        )
+
+    if (error) throw error
+}
+
 export const categoryItemVersionService = {
-    getAll, getVersionById, createVersion, updateVersion, deleteVersion, approveVersion, rejectVersion, remove
+    getAll, getVersionById, createVersion, updateVersion, deleteVersion, approveVersion, rejectVersion, remove, rollbackVersion
 }
