@@ -210,10 +210,12 @@ const remove = async (id) => {
     if (error) throw error
 }
 
+// admin
+
 const rollbackVersion = async (id, user_id) => {
-    const { error } = await supabase.supabaseClient
+    const { data: versionId, error } = await supabase.supabaseClient
         .rpc(
-            'rollback_category_item_version',
+            'admin_rollback_category_item_version',
             {
                 p_version_id: id,
                 p_user_id: user_id
@@ -221,6 +223,8 @@ const rollbackVersion = async (id, user_id) => {
         )
 
     if (error) throw error
+
+    return getVersionById(versionId)
 }
 
 export const categoryItemVersionService = {
