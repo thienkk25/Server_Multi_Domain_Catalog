@@ -11,5 +11,5 @@ export const categoryItemVersionController = {
     approveVersion: handle(req => categoryItemVersionService.approveVersion(req.params.id)),
     rejectVersion: handle(req => categoryItemVersionService.rejectVersion(req.params.id, req.body.reject_reason)),
     remove: handle(req => categoryItemVersionService.remove(req.params.id)),
-    rollbackVersion: handle(req => categoryItemVersionService.rollbackVersion(req.params.id))
+    rollbackVersion: handle(req => categoryItemVersionService.rollbackVersion(req.params.id, req.user.id))
 };
