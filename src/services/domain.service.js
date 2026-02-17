@@ -5,6 +5,27 @@ const getAll = async (query) => {
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
 
+    const { count, error: countError } = await supabase.supabaseClient
+        .from("domain")
+        .select("*", { count: "exact", head: true });
+
+    if (countError) throw new Error(countError.message);
+
+    const totalPages = Math.ceil((count || 0) / limit);
+
+    if (page > totalPages && totalPages !== 0) {
+        return {
+            data: [],
+            pagination: {
+                page,
+                limit,
+                total: count,
+                total_pages: totalPages,
+                has_more: false
+            }
+        };
+    }
+
     // Khởi tạo query builder
     let qb = supabase.supabaseClient
         .from("domain")
@@ -44,27 +65,11 @@ const getAll = async (query) => {
 
     qb = qb.range(offset, offset + limit - 1)
 
-    const { data, error, count } = await qb
+    const { data, error } = await qb
 
     if (error) throw error
 
-    const totalPages = Math.ceil(count / limit)
-
     const hasMore = page * limit < count
-
-    if (page > totalPages && totalPages !== 0) {
-        return {
-            data: [],
-            pagination: {
-                page,
-                limit,
-                total: count,
-                total_pages: totalPages,
-                has_more: hasMore
-            },
-        }
-    }
-
 
     return {
         data,
