@@ -54,7 +54,7 @@ const getCategoryItemById = async (id) => {
 
     return data
 }
-const syncCategoryItems = async ({ updatedFrom }) => {
+const syncCategoryItems = async ({ updated_from }) => {
 
     let query = supabase
         .from('category_item')
@@ -70,8 +70,8 @@ const syncCategoryItems = async ({ updatedFrom }) => {
         .eq('status', 'active')
         .order('updated_at')
 
-    if (updatedFrom) {
-        query = query.gte('updated_at', updatedFrom)
+    if (updated_from) {
+        query = query.gte('updated_at', updated_from)
     }
 
     const { data, error } = await query
@@ -89,6 +89,16 @@ const getDomainsRef = async () => {
         .from('domain')
         .select('id, code, name')
         .order('name')
+
+    if (error) throw error
+    return data
+}
+const getDomainDetail = async (id) => {
+    const { data, error } = await supabase
+        .from('domain')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle()
 
     if (error) throw error
     return data
@@ -113,7 +123,7 @@ const getCategoryGroupsRef = async ({ domain_id }) => {
 const getGroupDetail = async (id) => {
     const { data, error } = await supabase
         .from('category_group')
-        .select('id,code, name')
+        .select('*')
         .eq('id', id)
         .maybeSingle()
 
