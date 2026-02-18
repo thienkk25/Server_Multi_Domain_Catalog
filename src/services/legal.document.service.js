@@ -1,11 +1,11 @@
-import { supabase } from '../configs/supabase.js'
+import supabase from '../configs/supabase.js'
 import path from 'path'
 
 const getAll = async (query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase.supabaseClient
+    const { count, error: countError } = await supabase
         .from("public_legal_document")
         .select("*", { count: "exact", head: true });
 
@@ -26,7 +26,7 @@ const getAll = async (query) => {
         };
     }
     // Khởi tạo query builder
-    let qb = supabase.supabaseClient
+    let qb = supabase
         .from("public_legal_document")
         .select("*", { count: "exact" });
 
@@ -83,7 +83,7 @@ const getAll = async (query) => {
 }
 
 const getById = async (id) => {
-    const { data: legal_document, error } = await supabase.supabaseClient
+    const { data: legal_document, error } = await supabase
         .from('public_legal_document')
         .select('*')
         .eq('id', id)
@@ -101,7 +101,7 @@ const create = async (payload, file) => {
         fileInfo = await uploadFile(file)
     }
 
-    const { data, error } = await supabase.supabaseClient
+    const { data, error } = await supabase
         .from('legal_document')
         .insert({
             ...payload,
@@ -121,7 +121,7 @@ const create = async (payload, file) => {
 }
 
 const update = async (id, payload, file) => {
-    const { data: oldDoc, error: fetchError } = await supabase.supabaseClient
+    const { data: oldDoc, error: fetchError } = await supabase
         .from('legal_document')
         .select('file_name,file_url')
         .eq('id', id)
@@ -146,7 +146,7 @@ const update = async (id, payload, file) => {
 
     }
 
-    const { data, error } = await supabase.supabaseClient
+    const { data, error } = await supabase
         .from('legal_document')
         .update(cleanPayload)
         .eq('id', id)
@@ -156,7 +156,7 @@ const update = async (id, payload, file) => {
     if (error) throw error
 
     if (fileInfo && oldDoc?.file_url != fileUrl) {
-        await supabase.supabaseClient.storage
+        await supabase.storage
             .from('legal_document_file')
             .remove([oldDoc.file_url.split('legal_document_file/').pop()])
     }
@@ -167,19 +167,19 @@ const update = async (id, payload, file) => {
 
 
 const remove = async (id) => {
-    const { data: fileUrl } = await supabase.supabaseClient
+    const { data: fileUrl } = await supabase
         .from('legal_document')
         .select('file_url')
         .eq('id', id)
         .maybeSingle()
 
     if (fileUrl) {
-        await supabase.supabaseClient.storage
+        await supabase.storage
             .from('legal_document_file')
             .remove([fileUrl.file_url.split('legal_document_file/').pop()])
     }
 
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .from('legal_document')
         .delete()
         .eq('id', id)
@@ -206,7 +206,7 @@ const uploadFile = async (file) => {
 
     const storagePath = `files/${storageKey}`
 
-    const { data, error } = await supabase.supabaseClient.storage
+    const { data, error } = await supabase.storage
         .from('legal_document_file')
         .upload(storagePath, file.buffer, {
             contentType: file.mimetype,
@@ -214,7 +214,7 @@ const uploadFile = async (file) => {
 
     if (error) throw error
 
-    const link = supabase.supabaseClient.storage
+    const link = supabase.storage
         .from('legal_document_file')
         .getPublicUrl(data.path);
     const publicUrl = link.data.publicUrl;
@@ -229,7 +229,7 @@ const uploadFile = async (file) => {
 }
 
 const getSignedUrl = async (filePath) => {
-    const { data, error } = await supabase.supabaseClient.storage
+    const { data, error } = await supabase.storage
         .from('legal_document_file')
         .createSignedUrl(filePath, 60 * 5) // 5 phút
 
@@ -238,7 +238,7 @@ const getSignedUrl = async (filePath) => {
 }
 
 const downloadFile = async (filePath) => {
-    const { data, error } = await supabase.supabaseClient.storage
+    const { data, error } = await supabase.storage
         .from('legal_document_file')
         .download(filePath)
 
@@ -252,7 +252,7 @@ const getLegalDocumentsWithFile = async (query) => {
     const offset = (page - 1) * limit
 
     // Khởi tạo query builder
-    let qb = supabase.supabaseClient
+    let qb = supabase
         .from('public_legal_document')
         .select('*', { count: "exact" })
         .not('file_name', 'is', null)

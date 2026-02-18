@@ -1,11 +1,11 @@
-import { supabase } from '../configs/supabase.js'
+import supabase from '../configs/supabase.js'
 
 const getAll = async (query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
 
-    const { count, error: countError } = await supabase.supabaseClient
+    const { count, error: countError } = await supabase
         .from("domain")
         .select("*", { count: "exact", head: true });
 
@@ -27,7 +27,7 @@ const getAll = async (query) => {
     }
 
     // Khởi tạo query builder
-    let qb = supabase.supabaseClient
+    let qb = supabase
         .from("domain")
         .select("*", { count: "exact" });
 
@@ -84,7 +84,7 @@ const getAll = async (query) => {
 }
 
 const getById = async (id) => {
-    const { data: domain, error } = await supabase.supabaseClient
+    const { data: domain, error } = await supabase
         .from('domain')
         .select('*')
         .eq('id', id)
@@ -96,7 +96,7 @@ const getById = async (id) => {
 }
 
 const create = async (payload) => {
-    const { data, error } = await supabase.supabaseClient
+    const { data, error } = await supabase
         .from('domain')
         .insert(payload)
         .select()
@@ -112,7 +112,7 @@ const create = async (payload) => {
 }
 
 const update = async (id, payload) => {
-    const { data, error } = await supabase.supabaseClient
+    const { data, error } = await supabase
         .from('domain')
         .update(payload)
         .eq('id', id)
@@ -124,7 +124,7 @@ const update = async (id, payload) => {
 }
 
 const remove = async (id) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .from('domain')
         .delete()
         .eq('id', id)

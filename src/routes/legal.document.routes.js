@@ -16,10 +16,10 @@ router.get('/', legalDocumentController.getAll)
 router.get('/:id', legalDocumentController.getById)
 router.get('/documents/with-file', legalDocumentController.getLegalDocumentsWithFile)
 
-router.post('/', authMiddleware, checkRole(['admin']), upload.single('file'), legalDocumentController.create)
+router.post('/', checkRole(['admin']), upload.single('file'), legalDocumentController.create)
 
-router.patch('/:id', authMiddleware, checkRole(['admin']), upload.single('file'), legalDocumentController.update)
-router.delete('/:id', authMiddleware, checkRole(['admin']), legalDocumentController.remove)
+router.patch('/:id', checkRole(['admin']), upload.single('file'), legalDocumentController.update)
+router.delete('/:id', checkRole(['admin']), legalDocumentController.remove)
 
 router.get('/download', legalDocumentController.getSignedUrl)
 

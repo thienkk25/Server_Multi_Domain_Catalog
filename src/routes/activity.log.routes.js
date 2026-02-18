@@ -1,11 +1,12 @@
 import { Router } from "express"
-import { authMiddleware } from "../middlewares/auth.middleware.js"
 import { checkRole } from "../middlewares/role.middleware.js"
 import { activityLogController } from "../controllers/activity.log.controller.js"
 
 const router = Router()
 
-router.get('/', authMiddleware, checkRole(['admin']), activityLogController.getAll)
-router.get('/:id', authMiddleware, checkRole(['admin']), activityLogController.getById)
+router.use(checkRole(['admin']))
+
+router.get('/', activityLogController.getAll)
+router.get('/:id', activityLogController.getById)
 
 export default router

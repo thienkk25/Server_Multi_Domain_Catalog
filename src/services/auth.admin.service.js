@@ -1,10 +1,10 @@
-import { supabase } from '../configs/supabase.js'
+import supabase from '../configs/supabase.js'
 
 const getAll = async (query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase.supabaseClient
+    const { count, error: countError } = await supabase
         .from("profile")
         .select("*", { count: "exact", head: true });
 
@@ -25,7 +25,7 @@ const getAll = async (query) => {
         };
     }
     // Khởi tạo query builder
-    let qb = supabase.supabaseSuperAdmin
+    let qb = supabase
         .from("profile")
         .select("*", { count: "exact" })
 
@@ -83,7 +83,7 @@ const getAll = async (query) => {
 }
 
 const getById = async (id) => {
-    const { data, error } = await supabase.supabaseSuperAdmin
+    const { data, error } = await supabase
         .from("profile")
         .select("*")
         .eq("id", id)
@@ -97,7 +97,7 @@ const create = async ({ email, password, user_metadata }) => {
     if (password == null || password == '' || password == undefined) {
         password = '12345678'
     }
-    const { data, error } = await supabase.supabaseSuperAdmin.auth.admin.createUser({
+    const { data, error } = await supabase.auth.admin.createUser({
         email: email,
         password: password,
         user_metadata: user_metadata,
@@ -112,7 +112,7 @@ const create = async ({ email, password, user_metadata }) => {
 
 const update = async ({ id, password, user_metadata }) => {
     const { data: current, error: getError } =
-        await supabase.supabaseSuperAdmin.auth.admin.getUserById(id)
+        await supabase.auth.admin.getUserById(id)
 
     if (getError) throw getError
 
@@ -130,7 +130,7 @@ const update = async ({ id, password, user_metadata }) => {
         }
     }
 
-    const { error } = await supabase.supabaseSuperAdmin.auth.admin.updateUserById(id, payload)
+    const { error } = await supabase.auth.admin.updateUserById(id, payload)
     if (error) throw error
 
     return getById(id)
@@ -140,11 +140,11 @@ const update = async ({ id, password, user_metadata }) => {
 
 const remove = async (userId) => {
     const { error: authError } =
-        await supabase.supabaseSuperAdmin.auth.admin.deleteUser(userId)
+        await supabase.auth.admin.deleteUser(userId)
 
     if (authError) throw authError
 
-    const { error: dbError } = await supabase.supabaseClient
+    const { error: dbError } = await supabase
         .from('users')
         .delete()
         .eq('id', userId)
@@ -155,7 +155,7 @@ const remove = async (userId) => {
 
 
 const activateUser = async (userId) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .from('users')
         .update({ status: 'active' })
         .eq('id', userId)
@@ -168,14 +168,14 @@ const activateUser = async (userId) => {
 
 
 const deactivateUser = async (userId) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .from('users')
         .update({ status: 'inactive' })
         .eq('id', userId)
 
     if (error) throw error
 
-    await supabase.supabaseSuperAdmin.auth.admin.signOut(userId)
+    await supabase.auth.admin.signOut(userId)
 
     return getById(userId)
 
@@ -187,7 +187,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
     }
 
     // Update role
-    const { error: roleError } = await supabase.supabaseSuperAdmin
+    const { error: roleError } = await supabase
         .from('user_role')
         .update({ role_id: roleId })
         .eq('user_id', userId)
@@ -196,7 +196,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
 
     // Nếu KHÔNG phải domainOfficer → xoá domain
     if (roleId == 1) {
-        await supabase.supabaseSuperAdmin
+        await supabase
             .from('officer_domain')
             .delete()
             .eq('user_id', userId)
@@ -210,7 +210,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
     }
 
     // Reset domain cũ
-    await supabase.supabaseSuperAdmin
+    await supabase
         .from('officer_domain')
         .delete()
         .eq('user_id', userId)
@@ -221,7 +221,7 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
         domain_id: domainId
     }))
 
-    const { error: domainError } = await supabase.supabaseSuperAdmin
+    const { error: domainError } = await supabase
         .from('officer_domain')
         .insert(payload)
 

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { checkRole } from '../middlewares/role.middleware.js'
 import { domainController } from "../controllers/domain.controller.js";
 
@@ -9,9 +8,9 @@ const router = Router()
 router.get('/', domainController.getAll)
 router.get('/:id', domainController.getById)
 
-router.post('/', authMiddleware, checkRole(['admin', 'domainOfficer']), domainController.create)
+router.post('/', checkRole(['admin', 'domainOfficer']), domainController.create)
 
-router.patch('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), domainController.update)
-router.delete('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), domainController.remove)
+router.patch('/:id', checkRole(['admin', 'domainOfficer']), domainController.update)
+router.delete('/:id', checkRole(['admin', 'domainOfficer']), domainController.remove)
 
 export default router

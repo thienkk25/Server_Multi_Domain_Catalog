@@ -12,12 +12,16 @@ import activityLogRoutes from './activity.log.routes.js'
 import apiKeyRoutes from './api.key.routes.js'
 import importRoutes from "./import.route.js"
 import { limiterMiddleware } from '../middlewares/limiter.middleware.js'
+import { authMiddleware } from '../middlewares/auth.middleware.js'
 
 const router = Router()
 
 router.use('/auth', authRoutes)
 
 router.use(limiterMiddleware)
+router.use('/catalog-lookup', catalogLookupRoutes)
+
+router.use(authMiddleware)
 
 router.use('/admin/users', authAdminRoutes)
 
@@ -27,7 +31,6 @@ router.use('/category-group', categoryGroupRoutes)
 router.use('/category-item', categoryItemRoutes)
 router.use('/legal-document', legalDocumentRoutes)
 router.use('/category-item-version', categoryItemVersionRoutes)
-router.use('/catalog-lookup', catalogLookupRoutes)
 
 router.use('/api-key', apiKeyRoutes)
 router.use('/activity-log', activityLogRoutes)

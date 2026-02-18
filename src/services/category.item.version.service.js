@@ -1,10 +1,10 @@
-import { supabase } from '../configs/supabase.js'
+import supabase from '../configs/supabase.js'
 
 const getAll = async (user, query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase.supabaseClient
+    const { count, error: countError } = await supabase
         .from("category_item_version")
         .select("*", { count: "exact", head: true });
 
@@ -27,12 +27,12 @@ const getAll = async (user, query) => {
     // Khởi tạo query builder
     let qb
     if (user != null) {
-        qb = supabase.supabaseClient
+        qb = supabase
             .from("category_item_version")
             .select("*", { count: "exact" })
     }
     else {
-        qb = supabase.supabaseClient
+        qb = supabase
             .from("category_item_version_public")
             .select("*", { count: "exact" })
     }
@@ -86,7 +86,7 @@ const getAll = async (user, query) => {
 }
 
 const getVersionById = async (id) => {
-    const { data, error } = await supabase.supabaseClient
+    const { data, error } = await supabase
         .from('category_item_version')
         .select('*')
         .eq('id', id)
@@ -102,7 +102,7 @@ const createVersion = async (user_id, {
     version_data,
     legal_document_ids = []
 }) => {
-    const { data: versionId, error } = await supabase.supabaseClient
+    const { data: versionId, error } = await supabase
         .rpc(
             'do_create_category_item_version',
             {
@@ -113,7 +113,7 @@ const createVersion = async (user_id, {
 
     if (error) throw error
 
-    const { error: error_legal_document_ids } = await supabase.supabaseClient
+    const { error: error_legal_document_ids } = await supabase
         .rpc('update_category_item_version_legals', {
             p_version_id: versionId,
             p_legal_ids: legal_document_ids
@@ -131,7 +131,7 @@ const updateVersion = async (id, user_id, {
 }) => {
     let versionId
     if (version_type == 0) {
-        const { data: version_id, error } = await supabase.supabaseClient
+        const { data: version_id, error } = await supabase
             .rpc(
                 'do_update_category_item_version',
                 {
@@ -147,7 +147,7 @@ const updateVersion = async (id, user_id, {
     } else
 
         if (version_type == 1) {
-            const { data: version_id, error } = await supabase.supabaseClient
+            const { data: version_id, error } = await supabase
                 .rpc(
                     'do_update_pending_category_item_version',
                     {
@@ -166,7 +166,7 @@ const updateVersion = async (id, user_id, {
         throw new Error('versionId is null/undefined')
     }
 
-    const { error: error_legal_document_ids } = await supabase.supabaseClient
+    const { error: error_legal_document_ids } = await supabase
         .rpc('update_category_item_version_legals', {
             p_version_id: versionId,
             p_legal_ids: legal_document_ids
@@ -178,7 +178,7 @@ const updateVersion = async (id, user_id, {
 }
 
 const deleteVersion = async (id, user_id) => {
-    const { data: versionId, error } = await supabase.supabaseClient
+    const { data: versionId, error } = await supabase
         .rpc(
             'do_delete_category_item_version',
             {
@@ -195,7 +195,7 @@ const deleteVersion = async (id, user_id) => {
 // approver
 
 const approveVersion = async (id) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .rpc(
             'approve_category_item_version',
             { p_version_id: id }
@@ -207,7 +207,7 @@ const approveVersion = async (id) => {
 }
 
 const rejectVersion = async (id, rejectReason) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .rpc(
             'reject_category_item_version',
             {
@@ -224,7 +224,7 @@ const rejectVersion = async (id, rejectReason) => {
 // admin or domain officer with status = pending
 
 const remove = async (id) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .from('category_item_version')
         .delete()
         .eq('id', id)
@@ -235,7 +235,7 @@ const remove = async (id) => {
 // admin
 
 const rollbackVersion = async (id, user_id) => {
-    const { data: versionId, error } = await supabase.supabaseClient
+    const { data: versionId, error } = await supabase
         .rpc(
             'admin_rollback_category_item_version',
             {

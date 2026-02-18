@@ -1,4 +1,4 @@
-import { supabase } from '../configs/supabase.js'
+import supabase from '../configs/supabase.js'
 
 const signInWithPassword = async ({ email, password }) => {
     if (!email || !password) {
@@ -7,7 +7,7 @@ const signInWithPassword = async ({ email, password }) => {
         throw err
     }
 
-    const { data: userRow } = await supabase.supabaseSuperAdmin
+    const { data: userRow } = await supabase
         .from('users')
         .select('id, status')
         .eq('email', email)
@@ -26,7 +26,7 @@ const signInWithPassword = async ({ email, password }) => {
     }
 
     const { data, error: authError } =
-        await supabase.supabaseClient.auth.signInWithPassword({
+        await supabase.auth.signInWithPassword({
             email,
             password
         })
@@ -48,7 +48,7 @@ const signInWithPassword = async ({ email, password }) => {
 
 
 const register = async ({ email, password }) => {
-    const { data, error } = await supabase.supabaseClient.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
         email,
         password
     })
@@ -70,7 +70,7 @@ const register = async ({ email, password }) => {
 }
 
 const signOut = async () => {
-    const { error } = await supabase.supabaseClient.auth.signOut()
+    const { error } = await supabase.auth.signOut()
 
     if (error) {
         const err = new Error(error.message || 'Đăng xuất thất bại')
@@ -82,7 +82,7 @@ const signOut = async () => {
 
 const refreshToken = async ({ refresh_token }) => {
     const { data, error } =
-        await supabase.supabaseClient.auth.refreshSession({
+        await supabase.auth.refreshSession({
             refresh_token,
         })
 

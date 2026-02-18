@@ -1,17 +1,18 @@
 import { Router } from "express";
-import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { checkRole } from '../middlewares/role.middleware.js'
 import { apiKeyController } from "../controllers/api.key.controller.js";
 
 
 const router = Router()
 
-router.get('/', authMiddleware, checkRole(['admin']), apiKeyController.getAll)
-router.get('/:id', authMiddleware, checkRole(['admin']), apiKeyController.getById)
+router.use(checkRole(['admin']))
 
-router.post('/', authMiddleware, checkRole(['admin']), apiKeyController.create)
+router.get('/', apiKeyController.getAll)
+router.get('/:id', apiKeyController.getById)
 
-router.patch('/:id', authMiddleware, checkRole(['admin']), apiKeyController.update)
-router.delete('/:id', authMiddleware, checkRole(['admin']), apiKeyController.remove)
+router.post('/', apiKeyController.create)
+
+router.patch('/:id', apiKeyController.update)
+router.delete('/:id', apiKeyController.remove)
 
 export default router

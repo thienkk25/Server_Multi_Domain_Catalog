@@ -1,5 +1,5 @@
 import { parseFileToRows } from '../../utils/file.parser.js';
-import { supabase } from '../../configs/supabase.js';
+import supabase from '../../configs/supabase.js';
 
 export const importCatalogService = async (filePath) => {
     const rows = await parseFileToRows(filePath);
@@ -15,13 +15,13 @@ export const importCatalogService = async (filePath) => {
     }
 
     if (domains.length) {
-        await supabase.supabaseClient.from('domains').upsert(domains);
+        await supabase.from('domains').upsert(domains);
     }
     if (groups.length) {
-        await supabase.supabaseClient.from('category_groups').upsert(groups);
+        await supabase.from('category_groups').upsert(groups);
     }
     if (items.length) {
-        await supabase.supabaseClient.from('category_items').upsert(items);
+        await supabase.from('category_items').upsert(items);
     }
 
     return {

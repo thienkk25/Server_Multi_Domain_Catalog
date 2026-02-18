@@ -1,4 +1,4 @@
-import { supabase } from '../configs/supabase.js'
+import supabase from '../configs/supabase.js'
 
 const changePassword = async ({ new_password }) => {
     if (
@@ -10,7 +10,7 @@ const changePassword = async ({ new_password }) => {
     }
 
 
-    const { error } = await supabase.supabaseClient.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
         password: new_password
     });
 
@@ -40,7 +40,7 @@ const updateProfile = async ({ phone, full_name }) => {
         throw new Error('No data to update')
     }
 
-    const { error } = await supabase.supabaseClient.auth.updateUser({
+    const { error } = await supabase.auth.updateUser({
         data: payload
     })
 
@@ -52,7 +52,7 @@ const updateProfile = async ({ phone, full_name }) => {
 }
 
 const getProfile = async (id) => {
-    const { data, error } = await supabase.supabaseSuperAdmin
+    const { data, error } = await supabase
         .from('profile')
         .select('*')
         .eq('id', id)
@@ -65,7 +65,7 @@ const getProfile = async (id) => {
 }
 
 const role = async () => {
-    const { data: userRole, error } = await supabase.supabaseClient
+    const { data: userRole, error } = await supabase
         .from("user_role")
         .select("role:role_id(*)")
         .maybeSingle()

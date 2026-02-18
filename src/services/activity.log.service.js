@@ -1,10 +1,10 @@
-import { supabase } from "../configs/supabase.js"
+import supabase from "../configs/supabase.js"
 
 const getAll = async (query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase.supabaseClient
+    const { count, error: countError } = await supabase
         .from("activity_log")
         .select("*", { count: "exact", head: true });
 
@@ -25,7 +25,7 @@ const getAll = async (query) => {
         };
     }
     // Khởi tạo query builder
-    let qb = supabase.supabaseClient
+    let qb = supabase
         .from("activity_log")
         .select("*", { count: "exact" });
 
@@ -82,7 +82,7 @@ const getAll = async (query) => {
 }
 
 const getById = async (id) => {
-    const { data, error } = await supabase.supabaseClient
+    const { data, error } = await supabase
         .from("activity_log")
         .select("*")
         .eq("id", id)

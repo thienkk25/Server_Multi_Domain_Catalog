@@ -1,4 +1,4 @@
-import { supabase } from '../../configs/supabase.js';
+import supabase from '../../configs/supabase.js';
 import { parseFileToRows } from '../../utils/file.parser.js';
 
 export const importCategoryGroupOnly = async (filePath) => {
@@ -10,7 +10,7 @@ export const importCategoryGroupOnly = async (filePath) => {
         throw new Error('File không có domain_code');
     }
 
-    const { data: domains, error } = await supabase.supabaseClient
+    const { data: domains, error } = await supabase
         .from('domain')
         .select('id, domain_code:code')
         .in('code', domainCodes);
@@ -40,7 +40,7 @@ export const importCategoryGroupOnly = async (filePath) => {
         domain_id: domainMap[r.domain_code],
     }));
 
-    await supabase.supabaseClient
+    await supabase
         .from('category_group')
         .upsert(payload, { onConflict: 'code' });
 

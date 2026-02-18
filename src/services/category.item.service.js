@@ -1,10 +1,10 @@
-import { supabase } from '../configs/supabase.js'
+import supabase from '../configs/supabase.js'
 
 const getAll = async (query) => {
     const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
     const limit = parseInt(query.limit) || 20
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase.supabaseClient
+    const { count, error: countError } = await supabase
         .from("category_item_view")
         .select("*", { count: "exact", head: true });
 
@@ -25,7 +25,7 @@ const getAll = async (query) => {
         };
     }
     // Khởi tạo query builder
-    let qb = supabase.supabaseClient
+    let qb = supabase
         .from("category_item_view")
         .select("*", { count: "exact" });
 
@@ -82,7 +82,7 @@ const getAll = async (query) => {
 }
 
 const getById = async (id) => {
-    const { data: category_item, error } = await supabase.supabaseClient
+    const { data: category_item, error } = await supabase
         .from('category_item_view')
         .select('*')
         .eq('id', id)
@@ -97,7 +97,7 @@ const create = async (user_id, {
     category_item,
     legal_document_ids = []
 }) => {
-    const { data: item_id, error } = await supabase.supabaseClient
+    const { data: item_id, error } = await supabase
         .rpc(
             'admin_create_item',
             {
@@ -113,7 +113,7 @@ const create = async (user_id, {
         throw error
     }
 
-    const { error: error_legal_document_ids } = await supabase.supabaseClient
+    const { error: error_legal_document_ids } = await supabase
         .rpc('update_category_item_legals', {
             p_item_id: item_id,
             p_legal_ids: legal_document_ids
@@ -128,7 +128,7 @@ const update = async (id, user_id, {
     category_item,
     legal_document_ids = []
 }) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .rpc(
             'admin_update_item',
             {
@@ -140,7 +140,7 @@ const update = async (id, user_id, {
 
     if (error) throw error;
 
-    const { error: error_legal_document_ids } = await supabase.supabaseClient
+    const { error: error_legal_document_ids } = await supabase
         .rpc('update_category_item_legals', {
             p_item_id: id,
             p_legal_ids: legal_document_ids
@@ -152,7 +152,7 @@ const update = async (id, user_id, {
 }
 
 const remove = async (id) => {
-    const { error } = await supabase.supabaseClient
+    const { error } = await supabase
         .from('category_item')
         .delete()
         .eq('id', id)

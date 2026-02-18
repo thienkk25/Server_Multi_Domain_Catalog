@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { authOptional } from '../middlewares/auth.optional.js'
-import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { checkRole } from '../middlewares/role.middleware.js'
 import { categoryItemVersionController } from "../controllers/category.item.version.controller.js";
 
@@ -11,18 +10,18 @@ router.get('/', authOptional, categoryItemVersionController.getAll)
 router.get('/:id', categoryItemVersionController.getById)
 
 // domain officer
-router.post('/', authMiddleware, checkRole(['domainOfficer']), categoryItemVersionController.createVersion)
-router.post('/:id/update', authMiddleware, checkRole(['domainOfficer']), categoryItemVersionController.updateVersion)
-router.post('/:id/delete', authMiddleware, checkRole(['domainOfficer']), categoryItemVersionController.deleteVersion)
+router.post('/', checkRole(['domainOfficer']), categoryItemVersionController.createVersion)
+router.post('/:id/update', checkRole(['domainOfficer']), categoryItemVersionController.updateVersion)
+router.post('/:id/delete', checkRole(['domainOfficer']), categoryItemVersionController.deleteVersion)
 
 // approver
-router.post('/:id/approve', authMiddleware, checkRole(['approver']), categoryItemVersionController.approveVersion)
-router.post('/:id/reject', authMiddleware, checkRole(['approver']), categoryItemVersionController.rejectVersion)
+router.post('/:id/approve', checkRole(['approver']), categoryItemVersionController.approveVersion)
+router.post('/:id/reject', checkRole(['approver']), categoryItemVersionController.rejectVersion)
 
 // admin or domain officer with status = pending
-router.delete('/:id', authMiddleware, checkRole(['admin', 'domainOfficer']), categoryItemVersionController.remove)
+router.delete('/:id', checkRole(['admin', 'domainOfficer']), categoryItemVersionController.remove)
 
 // admin
-router.post('/:id/rollback', authMiddleware, checkRole(['admin']), categoryItemVersionController.rollbackVersion)
+router.post('/:id/rollback', checkRole(['admin']), categoryItemVersionController.rollbackVersion)
 
 export default router
