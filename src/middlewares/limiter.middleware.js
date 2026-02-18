@@ -1,5 +1,5 @@
 import rateLimit from "express-rate-limit"
-import { supabase } from "../configs/supabase.js"
+import supabase from "../configs/supabase.js"
 
 export const limiterMiddleware = rateLimit({
     windowMs: 1 * 60 * 1000,
@@ -12,7 +12,7 @@ export const limiterMiddleware = rateLimit({
         const apiKey = req.headers['x-api-key']
 
         if (apiKey) {
-            const { data: keys, error } = await supabase.supabaseSuperAdmin
+            const { data: keys, error } = await supabase
                 .from("api_key")
                 .select("*")
                 .eq("key", apiKey)
@@ -32,7 +32,7 @@ export const limiterMiddleware = rateLimit({
                 return false
             }
 
-            const { data, error } = await supabase.supabaseClient.auth.getUser(token);
+            const { data, error } = await supabase.auth.getUser(token);
 
             if (error || !data?.user) {
                 return false

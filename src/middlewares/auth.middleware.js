@@ -1,4 +1,4 @@
-import { supabase } from "../configs/supabase.js"
+import supabase from "../configs/supabase.js"
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -6,7 +6,7 @@ export const authMiddleware = async (req, res, next) => {
 
         // Nếu có API KEY → check trong bảng api_key
         if (apiKey) {
-            const { data: keys, error } = await supabase.supabaseSuperAdmin
+            const { data: keys, error } = await supabase
                 .from("api_key")
                 .select("*")
                 .eq("key", apiKey)
@@ -42,7 +42,7 @@ export const authMiddleware = async (req, res, next) => {
             })
         }
 
-        const { data, error } = await supabase.supabaseClient.auth.getUser(token);
+        const { data, error } = await supabase.auth.getUser(token);
 
         if (error || !data?.user) {
             return res.status(401).json({

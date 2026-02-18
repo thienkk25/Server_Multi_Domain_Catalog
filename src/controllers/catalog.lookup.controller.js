@@ -1,43 +1,10 @@
 import { catalogLookupService } from '../services/catalog.lookup.service.js'
-
-const getDomainsRef = async (req, res, next) => {
-    try {
-        const result = await catalogLookupService.getDomainsRef()
-        res.json(
-            {
-                success: true,
-                data: result
-            })
-    } catch (error) {
-        next(error)
-    }
-}
-
-const getCategoryGroupsRef = async (req, res, next) => {
-    try {
-        const result = await catalogLookupService.getCategoryGroupsRef(req.params.id)
-        res.json({
-            success: true,
-            data: result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
-
-const searchFlat = async (req, res, next) => {
-    try {
-        const result = await catalogLookupService.searchFlat(req.body)
-        res.json({
-            success: true,
-            data: result
-        })
-    } catch (error) {
-        next(error)
-    }
-}
-
+import { handle } from '../utils/handle.helper.js'
 export const catalogLookupController = {
-    getDomainsRef, getCategoryGroupsRef, searchFlat
+    searchCategoryItemsFlat: handle(req => catalogLookupService.searchCategoryItemsFlat(req.query)),
+    getCategoryItemById: handle(req => catalogLookupService.getCategoryItemById(req.params.id)),
+    syncCategoryItems: handle(req => catalogLookupService.syncCategoryItems(req.query)),
+    getDomainsRef: handle(req => catalogLookupService.getDomainsRef()),
+    getCategoryGroupsRef: handle(req => catalogLookupService.getCategoryGroupsRef(req.query)),
+    getGroupDetail: handle(req => catalogLookupService.getGroupDetail(req.params.id)),
 }

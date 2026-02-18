@@ -1,4 +1,4 @@
-import { supabase } from "../configs/supabase.js"
+import supabase from "../configs/supabase.js"
 
 export const authOptional = async (req, res, next) => {
     try {
@@ -15,7 +15,7 @@ export const authOptional = async (req, res, next) => {
             return next();
         }
 
-        const { data } = await supabase.supabaseClient.auth.getUser(token);
+        const { data } = await supabase.auth.getUser(token);
 
         req.user = data?.user ?? null;
 
