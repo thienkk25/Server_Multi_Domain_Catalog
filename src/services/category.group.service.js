@@ -50,7 +50,19 @@ const getAll = async (query, role) => {
 
     let dataQb = supabase
         .from(TABLE_NAME)
-        .select("*")
+        .select(`
+            id,
+            code,
+            name,
+            description,
+            domain:domain_id (
+                id,
+                code,
+                name
+            ),
+            created_at,
+            updated_at
+        `)
 
     const roleResult2 = applyRoleFilter(dataQb, role, "domain_id")
 
@@ -84,16 +96,24 @@ const getById = async (id, role) => {
 
     let qb = supabase
         .from(TABLE_NAME)
-        .select('*')
+        .select(`
+            id,
+            code,
+            name,
+            description,
+            domain:domain_id (
+                id,
+                code,
+                name
+            ),
+            created_at,
+            updated_at
+        `)
         .eq('id', id)
 
-    const roleResult = applyRoleFilter(qb, role, "domain_id")
-
-    if (roleResult.restricted) {
-        return emptyPagination(page, limit)
+    if (role?.code === 'domainOfficer' || role?.code === 'approver') {
+        qb = qb.in('domain_id', role.domains)
     }
-
-    qb = roleResult.qb
 
     const { data, error } = await qb.single()
 
