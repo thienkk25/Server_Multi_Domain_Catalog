@@ -1,16 +1,39 @@
 import supabase from '../configs/supabase.js'
 
-const getAll = async (query) => {
-    const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
-    const limit = parseInt(query.limit) || 20
+import {
+    applyRoleFilter,
+    applySearch,
+    applyFilters,
+    applySort,
+    emptyPagination
+} from '../utils/query.builder.js'
+
+const TABLE_NAME = 'category_group'
+
+const getAll = async (query, role) => {
+    const page = Math.max(parseInt(query.page) || 1, 1)
+    const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase
-        .from("category_group")
-        .select("*", { count: "exact", head: true });
 
-    if (countError) throw new Error(countError.message);
+    let countQb = supabase
+        .from(TABLE_NAME)
+        .select("id", { count: "exact", head: true })
 
-    const totalPages = Math.ceil((count || 0) / limit);
+    const roleResult = applyRoleFilter(countQb, role, "domain_id")
+
+    if (roleResult.restricted) {
+        return emptyPagination(page, limit)
+    }
+
+    countQb = roleResult.qb
+    countQb = applySearch(countQb, query.search, ["code", "name"])
+    countQb = applyFilters(countQb, query.filter)
+
+    const { count, error: countError } = await countQb
+    if (countError) throw countError
+
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
 
     if (page > totalPages && totalPages !== 0) {
         return {
@@ -18,84 +41,79 @@ const getAll = async (query) => {
             pagination: {
                 page,
                 limit,
-                total: count,
+                total,
                 total_pages: totalPages,
                 has_more: false
-            }
-        };
-    }
-    // Khởi tạo query builder
-    let qb = supabase
-        .from("category_group")
-        .select("*", { count: "exact" });
-
-    if (query.search) {
-        const s = query.search;
-
-        qb = qb.or(
-            `code.ilike.%${s}%,name.ilike.%${s}%`
-        )
-    }
-
-    if (query.filter) {
-        for (const key in query.filter) {
-            const value = query.filter[key];
-
-            // Nếu là array → checkbox nhiều giá trị
-            if (Array.isArray(value)) {
-                if (value.length > 0) {
-                    qb = qb.in(key, value);
-                }
-            }
-
-            // Nếu là chuỗi → filter 1 giá trị
-            else if (typeof value === "string" && value.trim() !== "") {
-                qb = qb.eq(key, value);
             }
         }
     }
 
-    const sortBy = query.sortBy || "created_at";
-    const sortOrder = query.sort === "asc" ? true : false
+    let dataQb = supabase
+        .from(TABLE_NAME)
+        .select("*")
 
-    qb = qb.order(sortBy, { ascending: sortOrder })
-    qb = qb.order("id", { ascending: true })
+    const roleResult2 = applyRoleFilter(dataQb, role, "domain_id")
 
-    qb = qb.range(offset, offset + limit - 1)
+    if (roleResult2.restricted) {
+        return emptyPagination(page, limit)
+    }
 
-    const { data, error } = await qb
+    dataQb = roleResult2.qb
+    dataQb = applySearch(dataQb, query.search, ["code", "name"])
+    dataQb = applyFilters(dataQb, query.filter)
+    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "name", "status"])
+
+    const { data, error } = await dataQb
+        .range(offset, offset + limit - 1)
 
     if (error) throw error
-
-    const hasMore = page * limit < count
 
     return {
         data,
         pagination: {
             page,
             limit,
-            total: count,
+            total,
             total_pages: totalPages,
-            has_more: hasMore
-        },
+            has_more: page < totalPages
+        }
     }
 }
 
-const getById = async (id) => {
-    const { data: category_group, error } = await supabase
-        .from('category_group')
+const getById = async (id, role) => {
+
+    let qb = supabase
+        .from(TABLE_NAME)
         .select('*')
         .eq('id', id)
-        .single()
 
-    if (error) throw error
+    const roleResult = applyRoleFilter(qb, role, "domain_id")
 
-    return category_group
+    if (roleResult.restricted) {
+        return emptyPagination(page, limit)
+    }
+
+    qb = roleResult.qb
+
+    const { data, error } = await qb.single()
+
+    if (error) {
+        if (error.code === 'PGRST116') {
+            return null
+        }
+        throw new Error(error.message)
+    }
+
+    return data
 }
 
 const create = async (payload) => {
+    if (!role.domains?.includes(payload.domain_id)) {
+        throw new Error("Bạn không được phép tạo nhóm cho lĩnh vực này.")
+    }
+
     const { data, error } = await supabase
-        .from('category_group')
+        .from(TABLE_NAME)
         .insert(payload)
         .select()
         .single()
@@ -110,8 +128,12 @@ const create = async (payload) => {
 }
 
 const update = async (id, payload) => {
+    if (!role.domains?.includes(payload.domain_id)) {
+        throw new Error("Bạn không được phép cập nhật nhóm cho lĩnh vực này.")
+    }
+
     const { data, error } = await supabase
-        .from('category_group')
+        .from(TABLE_NAME)
         .update(payload)
         .eq('id', id)
         .select()
@@ -122,8 +144,21 @@ const update = async (id, payload) => {
 }
 
 const remove = async (id) => {
+
+    const { data: payload, error: payloadError } = await supabase
+        .from(TABLE_NAME)
+        .select('domain_id')
+        .eq('id', id)
+        .single()
+
+    if (payloadError) throw payloadError
+
+    if (!role.domains?.includes(payload.domain_id)) {
+        throw new Error("Bạn không được phép xóa nhóm cho lĩnh vực này.")
+    }
+
     const { error } = await supabase
-        .from('category_group')
+        .from(TABLE_NAME)
         .delete()
         .eq('id', id)
 

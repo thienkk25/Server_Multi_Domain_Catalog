@@ -5,12 +5,12 @@ import { domainController } from "../controllers/domain.controller.js";
 
 const router = Router()
 
-router.get('/', domainController.getAll)
-router.get('/:id', domainController.getById)
+router.get('/', checkRole(['admin', 'domainOfficer']), domainController.getAll)
+router.get('/:id', checkRole(['admin', 'domainOfficer']), domainController.getById)
 
-router.post('/', checkRole(['admin', 'domainOfficer']), domainController.create)
+router.post('/', checkRole(['admin']), domainController.create)
 
-router.patch('/:id', checkRole(['admin', 'domainOfficer']), domainController.update)
-router.delete('/:id', checkRole(['admin', 'domainOfficer']), domainController.remove)
+router.patch('/:id', checkRole(['admin']), domainController.update)
+router.delete('/:id', checkRole(['admin']), domainController.remove)
 
 export default router

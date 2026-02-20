@@ -11,7 +11,7 @@ const signInWithPassword = async ({ email, password }) => {
         .from('users')
         .select('id, status')
         .eq('email', email)
-        .maybeSingle()
+        .single()
 
     if (!userRow) {
         const err = new Error('Người dùng không tồn tại')

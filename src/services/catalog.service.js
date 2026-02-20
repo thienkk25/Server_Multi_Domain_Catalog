@@ -1,6 +1,54 @@
 import supabase from '../configs/supabase.js'
 
-const searchCategoryItemsFlat = async ({
+const getDomains = async () => {
+    const { data, error } = await supabase
+        .from('domain')
+        .select('id, code, name')
+        .order('name')
+
+    if (error) throw error
+    return data
+}
+
+const getDomainById = async (id) => {
+    const { data, error } = await supabase
+        .from('domain')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+const getCategoryGroups = async ({ domain_id }) => {
+    let query = supabase
+        .from('category_group')
+        .select('id, code, name')
+        .order('name')
+
+    if (domain_id) {
+        query = query.eq('domain_id', domain_id)
+    }
+
+    const { data, error } = await query
+
+    if (error) throw error
+    return data
+}
+
+const getCategoryGroupById = async (id) => {
+    const { data, error } = await supabase
+        .from('category_group')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+const getCategoryItems = async ({
     group_id,
     keyword
 }) => {
@@ -54,6 +102,7 @@ const getCategoryItemById = async (id) => {
 
     return data
 }
+
 const syncCategoryItems = async ({ updated_from }) => {
 
     let query = supabase
@@ -83,81 +132,12 @@ const syncCategoryItems = async ({ updated_from }) => {
     }
 }
 
-
-const getDomainsRef = async () => {
-    const { data, error } = await supabase
-        .from('domain')
-        .select('id, code, name')
-        .order('name')
-
-    if (error) throw error
-    return data
-}
-const getDomainDetail = async (id) => {
-    const { data, error } = await supabase
-        .from('domain')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle()
-
-    if (error) throw error
-    return data
-}
-
-const getCategoryGroupsRef = async ({ domain_id }) => {
-    let query = supabase
-        .from('category_group')
-        .select('id, code, name')
-        .order('name')
-
-    if (domain_id) {
-        query = query.eq('domain_id', domain_id)
-    }
-
-    const { data, error } = await query
-
-    if (error) throw error
-    return data
-}
-
-const getGroupDetail = async (id) => {
-    const { data, error } = await supabase
-        .from('category_group')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle()
-
-    if (error) throw error
-    return data
-}
-
-// const searchFlat = async ({
-//     search,
-//     domain_id,
-//     group_id,
-//     limit,
-//     offset
-// }) => {
-//     const { data, error } = await supabase.rpc(
-//         'search_category_flat',
-//         {
-//             p_search: search || null,
-//             p_domain_id: domain_id || null,
-//             p_group_id: group_id || null,
-//             p_limit: limit ?? 20,
-//             p_offset: offset ?? 0,
-//         }
-//     );
-
-//     if (error) throw error;
-//     return data;
-// }
-
-export const catalogLookupService = {
-    searchCategoryItemsFlat,
+export const catalogService = {
+    getDomains,
+    getDomainById,
+    getCategoryGroups,
+    getCategoryGroupById,
+    getCategoryItems,
     getCategoryItemById,
     syncCategoryItems,
-    getDomainsRef,
-    getCategoryGroupsRef,
-    getGroupDetail
 }

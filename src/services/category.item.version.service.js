@@ -1,16 +1,41 @@
 import supabase from '../configs/supabase.js'
+import {
+    applyRoleFilter,
+    applyFilters,
+    applySort
+} from '../utils/query.builder.js'
 
-const getAll = async (user, query) => {
-    const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
-    const limit = parseInt(query.limit) || 20
+const TABLE_NAME = 'category_item_version'
+
+const getAll = async (query, user_id, role) => {
+    const page = Math.max(parseInt(query.page) || 1, 1)
+    const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase
-        .from("category_item_version")
-        .select("*", { count: "exact", head: true });
+    let countQb = supabase
+        .from(TABLE_NAME)
+        .select("id", { count: "exact", head: true })
 
-    if (countError) throw new Error(countError.message);
+    const roleResult = applyRoleFilter(countQb, role, "domain_id")
 
-    const totalPages = Math.ceil((count || 0) / limit);
+    if (roleResult.restricted) {
+        return emptyPagination(page, limit)
+    }
+
+    countQb = roleResult.qb
+
+    if (role.code === "domainOfficer") {
+        countQb = countQb.or(
+            `and(status.eq.approved),and(change_by.eq.${user_id})`
+        )
+    }
+
+    countQb = applyFilters(countQb, query.filter)
+
+    const { count, error: countError } = await countQb
+    if (countError) throw countError
+
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
 
     if (page > totalPages && totalPages !== 0) {
         return {
@@ -18,90 +43,92 @@ const getAll = async (user, query) => {
             pagination: {
                 page,
                 limit,
-                total: count,
+                total,
                 total_pages: totalPages,
                 has_more: false
-            }
-        };
-    }
-    // Khởi tạo query builder
-    let qb
-    if (user != null) {
-        qb = supabase
-            .from("category_item_version")
-            .select("*", { count: "exact" })
-    }
-    else {
-        qb = supabase
-            .from("category_item_version_public")
-            .select("*", { count: "exact" })
-    }
-
-    if (query.item_id) {
-        qb = qb.eq("item_id", query.item_id)
-    }
-
-    if (query.filter) {
-        for (const key in query.filter) {
-            const value = query.filter[key];
-
-            // Nếu là array → checkbox nhiều giá trị
-            if (Array.isArray(value)) {
-                if (value.length > 0) {
-                    qb = qb.in(key, value);
-                }
-            }
-
-            // Nếu là chuỗi → filter 1 giá trị
-            else if (typeof value === "string" && value.trim() !== "") {
-                qb = qb.eq(key, value);
             }
         }
     }
 
-    const sortBy = query.sortBy || "created_at";
-    const sortOrder = query.sort === "asc" ? true : false
+    let dataQb = supabase
+        .from(TABLE_NAME)
+        .select("*")
 
-    qb = qb.order(sortBy, { ascending: sortOrder })
-    qb = qb.order("id", { ascending: true })
+    const roleResult2 = applyRoleFilter(dataQb, role, "domain_id")
 
-    qb = qb.range(offset, offset + limit - 1)
+    if (roleResult2.restricted) {
+        return emptyPagination(page, limit)
+    }
 
-    const { data, error } = await qb
+    dataQb = roleResult2.qb
+
+    if (role.code === "domainOfficer") {
+        dataQb = dataQb.or(
+            `and(status.eq.approved),and(change_by.eq.${user_id})`
+        )
+    }
+
+    dataQb = applyFilters(dataQb, query.filter)
+    dataQb = applySort(dataQb, query, ["created_at", "applied_at", "updated_at", "status"])
+
+    const { data, error } = await dataQb
+        .range(offset, offset + limit - 1)
 
     if (error) throw error
-
-    const hasMore = page * limit < count
 
     return {
         data,
         pagination: {
             page,
             limit,
-            total: count,
+            total,
             total_pages: totalPages,
-            has_more: hasMore
-        },
+            has_more: page < totalPages
+        }
     }
 }
 
-const getVersionById = async (id) => {
-    const { data, error } = await supabase
-        .from('category_item_version')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle()
+const getVersionById = async (id, user_id, role) => {
 
-    if (error) throw error
+    let qb = supabase
+        .from(TABLE_NAME)
+        .select("*")
+        .eq("id", id)
+
+    const { qb: filteredQb, restricted } =
+        applyRoleFilter(qb, role, "domain_id")
+
+    if (restricted) return null
+
+    qb = filteredQb
+
+    if (role.code === "domainOfficer") {
+        qb = qb.or(
+            `status.eq.approved,change_by.eq.${user_id}`
+        )
+    }
+
+    const { data, error } = await qb.single()
+
+    if (error) {
+        if (error.code === "PGRST116") return null
+        throw error
+    }
+
     return data
 }
 
 // domain officer 
 
-const createVersion = async (user_id, {
+const createVersion = async (user_id, role, {
     version_data,
     legal_document_ids = []
 }) => {
+
+    if (!role.domains?.includes(version_data.domain_id)) {
+        throw new Error("Bạn không được phép tạo phiên bản cho lĩnh vực này.")
+    }
+
     const { data: versionId, error } = await supabase
         .rpc(
             'do_create_category_item_version',
@@ -121,14 +148,19 @@ const createVersion = async (user_id, {
 
     if (error_legal_document_ids) throw error
 
-    return getVersionById(versionId)
+    return getVersionById(versionId, user_id, role)
 }
 
-const updateVersion = async (id, user_id, {
+const updateVersion = async (id, user_id, role, {
     version_type,
     version_data,
     legal_document_ids = []
 }) => {
+
+    if (!role.domains?.includes(version_data.domain_id)) {
+        throw new Error("Bạn không được phép cập nhật phiên bản cho lĩnh vực này.")
+    }
+
     let versionId
     if (version_type == 0) {
         const { data: version_id, error } = await supabase
@@ -174,10 +206,15 @@ const updateVersion = async (id, user_id, {
 
     if (error_legal_document_ids) throw error_legal_document_ids
 
-    return getVersionById(versionId)
+    return getVersionById(versionId, user_id, role)
 }
 
-const deleteVersion = async (id, user_id) => {
+const deleteVersion = async (id, user_id, role) => {
+
+    if (!role.domains?.includes(version_data.domain_id)) {
+        throw new Error("Bạn không được phép xóa phiên bản cho lĩnh vực này.")
+    }
+
     const { data: versionId, error } = await supabase
         .rpc(
             'do_delete_category_item_version',
@@ -189,12 +226,12 @@ const deleteVersion = async (id, user_id) => {
 
     if (error) throw error
 
-    return getVersionById(versionId)
+    return getVersionById(versionId, user_id, role)
 }
 
 // approver
 
-const approveVersion = async (id) => {
+const approveVersion = async (id, user_id, role) => {
     const { error } = await supabase
         .rpc(
             'approve_category_item_version',
@@ -203,10 +240,10 @@ const approveVersion = async (id) => {
 
     if (error) throw error;
 
-    return getVersionById(id)
+    return getVersionById(id, user_id, role)
 }
 
-const rejectVersion = async (id, rejectReason) => {
+const rejectVersion = async (id, rejectReason, user_id, role) => {
     const { error } = await supabase
         .rpc(
             'reject_category_item_version',
@@ -218,23 +255,32 @@ const rejectVersion = async (id, rejectReason) => {
 
     if (error) throw error;
 
-    return getVersionById(id)
+    return getVersionById(id, user_id, role)
 }
 
 // admin or domain officer with status = pending
 
-const remove = async (id) => {
-    const { error } = await supabase
-        .from('category_item_version')
+const remove = async (id, role) => {
+
+    let qb = supabase
+        .from(TABLE_NAME)
         .delete()
         .eq('id', id)
+
+    if (role.code === "domainOfficer") {
+        qb = qb.or(
+            `status.eq.pending`
+        )
+    }
+
+    const { error } = await qb
 
     if (error) throw error
 }
 
 // admin
 
-const rollbackVersion = async (id, user_id) => {
+const rollbackVersion = async (id, user_id, role) => {
     const { data: versionId, error } = await supabase
         .rpc(
             'admin_rollback_category_item_version',
@@ -246,7 +292,7 @@ const rollbackVersion = async (id, user_id) => {
 
     if (error) throw error
 
-    return getVersionById(versionId)
+    return getVersionById(versionId, user_id, role)
 }
 
 export const categoryItemVersionService = {

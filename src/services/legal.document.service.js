@@ -1,17 +1,27 @@
 import supabase from '../configs/supabase.js'
 import path from 'path'
+import {
+    applySearch,
+    applyFilters,
+    applySort
+} from '../utils/query.builder.js'
 
-const getAll = async (query) => {
-    const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
-    const limit = parseInt(query.limit) || 20
+const getAll = async (query, role) => {
+    const page = Math.max(parseInt(query.page) || 1, 1)
+    const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase
-        .from("public_legal_document")
-        .select("*", { count: "exact", head: true });
+    let countQb = supabase
+        .from('public_legal_document')
+        .select("id", { count: "exact", head: true })
 
-    if (countError) throw new Error(countError.message);
+    countQb = applySearch(countQb, query.search, ["code", "name"])
+    countQb = applyFilters(countQb, query.filter)
 
-    const totalPages = Math.ceil((count || 0) / limit);
+    const { count, error: countError } = await countQb
+    if (countError) throw countError
+
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
 
     if (page > totalPages && totalPages !== 0) {
         return {
@@ -19,79 +29,57 @@ const getAll = async (query) => {
             pagination: {
                 page,
                 limit,
-                total: count,
+                total,
                 total_pages: totalPages,
                 has_more: false
-            }
-        };
-    }
-    // Khởi tạo query builder
-    let qb = supabase
-        .from("public_legal_document")
-        .select("*", { count: "exact" });
-
-    if (query.search) {
-        const s = query.search;
-
-        qb = qb.or(
-            `code.ilike.%${s}%,title.ilike.%${s}%`
-        )
-    }
-
-    if (query.filter) {
-        for (const key in query.filter) {
-            const value = query.filter[key];
-
-            // Nếu là array → checkbox nhiều giá trị
-            if (Array.isArray(value)) {
-                if (value.length > 0) {
-                    qb = qb.in(key, value);
-                }
-            }
-
-            // Nếu là chuỗi → filter 1 giá trị
-            else if (typeof value === "string" && value.trim() !== "") {
-                qb = qb.eq(key, value);
             }
         }
     }
 
-    const sortBy = query.sortBy || "created_at";
-    const sortOrder = query.sort === "asc" ? true : false
+    let dataQb = supabase
+        .from('public_legal_document')
+        .select("*")
 
-    qb = qb.order(sortBy, { ascending: sortOrder })
-    qb = qb.order("id", { ascending: true })
+    dataQb = applySearch(dataQb, query.search, ["code", "title"])
+    dataQb = applyFilters(dataQb, query.filter)
+    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "status", "title", "type"])
 
-    qb = qb.range(offset, offset + limit - 1)
-
-    const { data, error } = await qb
+    const { data, error } = await dataQb
+        .range(offset, offset + limit - 1)
 
     if (error) throw error
-
-    const hasMore = page * limit < count
 
     return {
         data,
         pagination: {
             page,
             limit,
-            total: count,
+            total,
             total_pages: totalPages,
-            has_more: hasMore
-        },
+            has_more: page < totalPages
+        }
     }
 }
 
+
 const getById = async (id) => {
-    const { data: legal_document, error } = await supabase
+
+    let qb = supabase
         .from('public_legal_document')
         .select('*')
         .eq('id', id)
-        .single()
 
-    if (error) throw error
+    const { data, error } = await qb.single()
 
-    return legal_document
+    if (error) {
+        if (error.code === 'PGRST116') {
+            // Không tìm thấy hoặc không có quyền
+            return null
+        }
+        throw new Error(error.message)
+    }
+
+    return data
 }
 
 const create = async (payload, file) => {
@@ -171,7 +159,7 @@ const remove = async (id) => {
         .from('legal_document')
         .select('file_url')
         .eq('id', id)
-        .maybeSingle()
+        .single()
 
     if (fileUrl) {
         await supabase.storage
@@ -237,18 +225,9 @@ const getSignedUrl = async (filePath) => {
     return data.signedUrl
 }
 
-const downloadFile = async (filePath) => {
-    const { data, error } = await supabase.storage
-        .from('legal_document_file')
-        .download(filePath)
-
-    if (error) throw error
-    return data
-}
-
 const getLegalDocumentsWithFile = async (query) => {
-    const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
-    const limit = parseInt(query.limit) || 20
+    const page = Math.max(parseInt(query.page) || 1, 1)
+    const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
 
     // Khởi tạo query builder

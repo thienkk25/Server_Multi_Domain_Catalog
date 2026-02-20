@@ -1,16 +1,34 @@
 import supabase from '../configs/supabase.js'
+import {
+    applyFilters,
+    applySort
+} from '../utils/query.builder.js'
 
-const getAll = async (query) => {
-    const page = parseInt(query.page) < 0 ? 1 : parseInt(query.page) || 1
-    const limit = parseInt(query.limit) || 20
+const getAll = async (query, role, isPublic = false) => {
+    const page = Math.max(parseInt(query.page) || 1, 1)
+    const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
-    const { count, error: countError } = await supabase
+
+    let countQb = supabase
         .from("category_item_view")
-        .select("*", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
 
-    if (countError) throw new Error(countError.message);
+    if (isPublic) {
+        countQb = countQb.eq("status", "active")
+    }
 
-    const totalPages = Math.ceil((count || 0) / limit);
+    if (role?.code === "domainOfficer" || role?.code === "approver") {
+        countQb = countQb.in("domain_id", role.domains)
+    }
+
+    countQb = applySearch(countQb, query.search, ["code", "name"])
+    countQb = applyFilters(countQb, query.filter)
+
+    const { count, error: countError } = await countQb
+    if (countError) throw countError
+
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
 
     if (page > totalPages && totalPages !== 0) {
         return {
@@ -18,82 +36,68 @@ const getAll = async (query) => {
             pagination: {
                 page,
                 limit,
-                total: count,
+                total,
                 total_pages: totalPages,
                 has_more: false
-            }
-        };
-    }
-    // Khởi tạo query builder
-    let qb = supabase
-        .from("category_item_view")
-        .select("*", { count: "exact" });
-
-    if (query.search) {
-        const s = query.search;
-
-        qb = qb.or(
-            `code.ilike.%${s}%,name.ilike.%${s}%`
-        )
-    }
-
-    if (query.filter) {
-        for (const key in query.filter) {
-            const value = query.filter[key];
-
-            // Nếu là array → checkbox nhiều giá trị
-            if (Array.isArray(value)) {
-                if (value.length > 0) {
-                    qb = qb.in(key, value);
-                }
-            }
-
-            // Nếu là chuỗi → filter 1 giá trị
-            else if (typeof value === "string" && value.trim() !== "") {
-                qb = qb.eq(key, value);
             }
         }
     }
 
-    const sortBy = query.sortBy || "created_at";
-    const sortOrder = query.sort === "asc" ? true : false
+    let dataQb = supabase
+        .from("category_item_view")
+        .select("*")
 
-    qb = qb.order(sortBy, { ascending: sortOrder })
-    qb = qb.order("id", { ascending: true })
+    if (isPublic) {
+        dataQb = dataQb.eq("status", "active")
+    }
 
-    qb = qb.range(offset, offset + limit - 1)
+    if (role?.code === "domainOfficer" || role?.code === "approver") {
+        dataQb = dataQb.in("domain_id", role.domains)
+    }
 
-    const { data, error } = await qb
+    dataQb = applySearch(dataQb, query.search, ["code", "name"])
+    dataQb = applyFilters(dataQb, query.filter)
+    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "name", "status"])
+
+    const { data, error } = await dataQb
+        .range(offset, offset + limit - 1)
 
     if (error) throw error
-
-    const hasMore = page * limit < count
 
     return {
         data,
         pagination: {
             page,
             limit,
-            total: count,
+            total,
             total_pages: totalPages,
-            has_more: hasMore
-        },
+            has_more: page < totalPages
+        }
     }
 }
 
-const getById = async (id) => {
-    const { data: category_item, error } = await supabase
+const getById = async (id, role, isPublic = false) => {
+    let qb = supabase
         .from('category_item_view')
         .select('*')
         .eq('id', id)
-        .maybeSingle()
+
+    if (isPublic) {
+        qb = qb.eq('status', 'active')
+    }
+
+    if (role?.code === 'domainOfficer' || role?.code === 'approver') {
+        qb = qb.in('domain_id', role.domains)
+    }
+
+    const { data, error } = await qb.single()
 
     if (error) throw error
 
-    return category_item
+    return data
 }
 
-const create = async (user_id, {
+const create = async (user_id, role, {
     category_item,
     legal_document_ids = []
 }) => {
@@ -121,10 +125,10 @@ const create = async (user_id, {
 
     if (error_legal_document_ids) throw error
 
-    return getById(item_id)
+    return getById(item_id, role)
 }
 
-const update = async (id, user_id, {
+const update = async (id, user_id, role, {
     category_item,
     legal_document_ids = []
 }) => {
@@ -148,7 +152,7 @@ const update = async (id, user_id, {
 
     if (error_legal_document_ids) throw error
 
-    return getById(id);
+    return getById(id, role);
 }
 
 const remove = async (id) => {

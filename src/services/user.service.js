@@ -56,7 +56,7 @@ const getProfile = async (id) => {
         .from('profile')
         .select('*')
         .eq('id', id)
-        .maybeSingle()
+        .single()
 
     if (error) {
         throw error
@@ -68,7 +68,7 @@ const role = async () => {
     const { data: userRole, error } = await supabase
         .from("user_role")
         .select("role:role_id(*)")
-        .maybeSingle()
+        .single()
     if (error) {
         throw error
     }

@@ -1,12 +1,11 @@
 import { Router } from "express";
-import { authOptional } from '../middlewares/auth.optional.js'
 import { checkRole } from '../middlewares/role.middleware.js'
 import { categoryItemVersionController } from "../controllers/category.item.version.controller.js";
 
 
 const router = Router()
 
-router.get('/', authOptional, categoryItemVersionController.getAll)
+router.get('/', categoryItemVersionController.getAll)
 router.get('/:id', categoryItemVersionController.getById)
 
 // domain officer
