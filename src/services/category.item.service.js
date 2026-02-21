@@ -1,5 +1,6 @@
 import supabase from '../configs/supabase.js'
 import {
+    applySearch,
     applyFilters,
     applySort
 } from '../utils/query.builder.js'

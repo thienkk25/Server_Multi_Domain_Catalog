@@ -15,7 +15,7 @@ const getAll = async (query) => {
         .from(TABLE_NAME)
         .select("id", { count: "exact", head: true })
 
-    countQb = applySearch(countQb, query.search, ["code", "name"])
+    countQb = applySearch(countQb, query.search, ["method", "action", "timestamp"])
     countQb = applyFilters(countQb, query.filter)
 
     const { count, error: countError } = await countQb
@@ -41,9 +41,9 @@ const getAll = async (query) => {
         .from(TABLE_NAME)
         .select("*")
 
-    dataQb = applySearch(dataQb, query.search, ["code", "name"])
+    dataQb = applySearch(dataQb, query.search, ["method", "action", "timestamp"])
     dataQb = applyFilters(dataQb, query.filter)
-    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "name", "status"])
+    dataQb = applySort(dataQb, query, ["timestamp", 'action', 'method'])
 
     const { data, error } = await dataQb
         .range(offset, offset + limit - 1)

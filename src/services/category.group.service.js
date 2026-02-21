@@ -73,7 +73,7 @@ const getAll = async (query, role) => {
     dataQb = roleResult2.qb
     dataQb = applySearch(dataQb, query.search, ["code", "name"])
     dataQb = applyFilters(dataQb, query.filter)
-    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "name", "status"])
+    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "name"])
 
     const { data, error } = await dataQb
         .range(offset, offset + limit - 1)

@@ -14,7 +14,7 @@ const getAll = async (query, role) => {
         .from('public_legal_document')
         .select("id", { count: "exact", head: true })
 
-    countQb = applySearch(countQb, query.search, ["code", "name"])
+    countQb = applySearch(countQb, query.search, ["code", "title", "issued_by_name", "file_name"])
     countQb = applyFilters(countQb, query.filter)
 
     const { count, error: countError } = await countQb
@@ -40,7 +40,7 @@ const getAll = async (query, role) => {
         .from('public_legal_document')
         .select("*")
 
-    dataQb = applySearch(dataQb, query.search, ["code", "title"])
+    dataQb = applySearch(dataQb, query.search, ["code", "title", "issued_by_name", "file_name"])
     dataQb = applyFilters(dataQb, query.filter)
     dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "status", "title", "type"])
 
