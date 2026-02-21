@@ -5,17 +5,16 @@ import { categoryGroupController } from "../controllers/category.group.controlle
 
 const router = Router()
 
-router.use(checkRole(['admin', 'domainOfficer']))
 
-router.get('/lookup', categoryGroupController.lookup)
+router.get('/lookup', checkRole(['admin', 'domainOfficer', 'approver']), categoryGroupController.lookup)
 
-router.get('/', categoryGroupController.getAll)
-router.get('/:id', categoryGroupController.getById)
+router.get('/', checkRole(['admin', 'domainOfficer', 'approver']), categoryGroupController.getAll)
+router.get('/:id', checkRole(['admin', 'domainOfficer', 'approver']), categoryGroupController.getById)
 
-router.post('/', categoryGroupController.create)
+router.post('/', checkRole(['admin', 'domainOfficer']), categoryGroupController.create)
 
-router.patch('/:id', categoryGroupController.update)
-router.delete('/:id', categoryGroupController.remove)
+router.patch('/:id', checkRole(['admin', 'domainOfficer']), categoryGroupController.update)
+router.delete('/:id', checkRole(['admin', 'domainOfficer']), categoryGroupController.remove)
 
 
 export default router

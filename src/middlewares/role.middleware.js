@@ -24,13 +24,20 @@ export const checkRole = (allowedRoles = []) => {
                 .eq("id", userId)
                 .single()
 
-            if (error || !data) {
+            if (error) {
+                console.error("CHECK ROLE ERROR:", error)
                 return res.status(403).json({
                     success: false,
-                    message: "Không lấy được thông tin phân quyền"
+                    message: error.message || "Lỗi truy vấn phân quyền"
                 })
             }
 
+            if (!data) {
+                return res.status(403).json({
+                    success: false,
+                    message: "Không tìm thấy người dùng trong hệ thống"
+                })
+            }
             // Lấy role code (giả định 1 user = 1 role)
             const roleCode = data.user_role?.[0]?.role?.code
 

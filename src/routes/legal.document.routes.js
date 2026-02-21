@@ -12,9 +12,9 @@ const upload = multer({
 
 const router = Router()
 
-router.get('/', legalDocumentController.getAll)
-router.get('/:id', legalDocumentController.getById)
-router.get('/documents/with-file', legalDocumentController.getLegalDocumentsWithFile)
+router.get('/', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getAll)
+router.get('/:id', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getById)
+router.get('/documents/with-file', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getLegalDocumentsWithFile)
 
 router.post('/', checkRole(['admin']), upload.single('file'), legalDocumentController.create)
 

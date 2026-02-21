@@ -18,7 +18,11 @@ const getAll = async (query, role, isPublic = false) => {
         countQb = countQb.eq("status", "active")
     }
 
-    if (role?.code === "domainOfficer" || role?.code === "approver") {
+    if (
+        (role?.code === "domainOfficer" || role?.code === "approver") &&
+        Array.isArray(role?.domains) &&
+        role.domains.length > 0
+    ) {
         countQb = countQb.in("domain_id", role.domains)
     }
 
@@ -52,7 +56,11 @@ const getAll = async (query, role, isPublic = false) => {
         dataQb = dataQb.eq("status", "active")
     }
 
-    if (role?.code === "domainOfficer" || role?.code === "approver") {
+    if (
+        (role?.code === "domainOfficer" || role?.code === "approver") &&
+        Array.isArray(role?.domains) &&
+        role.domains.length > 0
+    ) {
         dataQb = dataQb.in("domain_id", role.domains)
     }
 

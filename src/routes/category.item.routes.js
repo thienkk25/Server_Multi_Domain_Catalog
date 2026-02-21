@@ -5,8 +5,8 @@ import { categoryItemController } from "../controllers/category.item.controller.
 
 const router = Router()
 
-router.get('/', categoryItemController.getAll)
-router.get('/:id', categoryItemController.getById)
+router.get('/', checkRole(['admin', 'domainOfficer', 'approver']), categoryItemController.getAll)
+router.get('/:id', checkRole(['admin', 'domainOfficer', 'approver']), categoryItemController.getById)
 
 router.post('/', checkRole(['admin']), categoryItemController.create)
 

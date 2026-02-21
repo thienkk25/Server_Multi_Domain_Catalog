@@ -6,7 +6,7 @@ import {
     applySort
 } from '../utils/query.builder.js'
 
-const getAll = async (query, role) => {
+const getAll = async (query) => {
     const page = Math.max(parseInt(query.page) || 1, 1)
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit

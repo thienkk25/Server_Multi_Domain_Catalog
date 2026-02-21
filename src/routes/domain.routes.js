@@ -5,10 +5,10 @@ import { domainController } from "../controllers/domain.controller.js";
 
 const router = Router()
 
-router.get('/lookup', checkRole(['admin', 'domainOfficer']), domainController.lookup)
+router.get('/lookup', checkRole(['admin', 'domainOfficer', 'approver']), domainController.lookup)
 
-router.get('/', checkRole(['admin', 'domainOfficer']), domainController.getAll)
-router.get('/:id', checkRole(['admin', 'domainOfficer']), domainController.getById)
+router.get('/', checkRole(['admin', 'domainOfficer', 'approver']), domainController.getAll)
+router.get('/:id', checkRole(['admin', 'domainOfficer', 'approver']), domainController.getById)
 
 router.post('/', checkRole(['admin']), domainController.create)
 

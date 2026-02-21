@@ -132,52 +132,33 @@ const lookup = async (role, query) => {
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
 
+    if (!query.domain_id) {
+        throw new Error("domain_id is required")
+    }
+
     let countQb = supabase
         .from(TABLE_NAME)
         .select("id", { count: "exact", head: true })
+        .eq("domain_id", query.domain_id)
 
-    const roleResult = applyRoleFilter(countQb, role, "domain_id")
+    const roleCount = applyRoleFilter(countQb, role, "domain_id")
+    if (roleCount.restricted) return emptyPagination(page, limit)
 
-    if (roleResult.restricted) {
-        return emptyPagination(page, limit)
-    }
-
-    countQb = roleResult.qb
-
-    const { count, error: countError } = await countQb
+    const { count, error: countError } = await roleCount.qb
     if (countError) throw countError
 
     const total = count || 0
     const totalPages = Math.ceil(total / limit)
 
-    if (page > totalPages && totalPages !== 0) {
-        return {
-            data: [],
-            pagination: {
-                page,
-                limit,
-                total,
-                total_pages: totalPages,
-                has_more: false
-            }
-        }
-    }
-
     let dataQb = supabase
         .from(TABLE_NAME)
         .select("id, code, name")
+        .eq("domain_id", query.domain_id)
 
-    const roleResult2 = applyRoleFilter(dataQb, role, "domain_id")
+    const roleData = applyRoleFilter(dataQb, role, "domain_id")
+    if (roleData.restricted) return emptyPagination(page, limit)
 
-    if (roleResult2.restricted) {
-        return emptyPagination(page, limit)
-    }
-
-    dataQb = roleResult2.qb
-
-    dataQb = dataQb.eq("domain_id", query.domain_id)
-
-    const { data, error } = await dataQb
+    const { data, error } = await roleData.qb
         .range(offset, offset + limit - 1)
 
     if (error) throw error

@@ -29,14 +29,23 @@ router.use('/auth', authRoutes)
 router.use(authMiddleware)
 
 router.use('/admin/users', authAdminRoutes)
+
 router.use('/user', userRoutes)
+
 router.use('/domain', domainRoutes)
+
 router.use('/category-group', categoryGroupRoutes)
+
 router.use('/category-item', categoryItemRoutes)
+
 router.use('/category-item-version', categoryItemVersionRoutes)
+
 router.use('/legal-document', legalDocumentRoutes)
+
 router.use('/api-key', apiKeyRoutes)
+
 router.use('/activity-log', activityLogRoutes)
+
 router.use('/import', importRoutes)
 
 export default router
