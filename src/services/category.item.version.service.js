@@ -7,6 +7,22 @@ import {
 
 const TABLE_NAME = 'category_item_version'
 
+function applyVersionRole(qb, role, user_id) {
+    if (role.code === "domainOfficer") {
+        return qb.or(
+            `status.eq.approved,change_by.eq.${user_id}`
+        )
+    }
+
+    if (role.code === "approver") {
+        return qb.or(
+            `status.eq.approved,status.eq.pending,change_by.eq.${user_id},approved_by.eq.${user_id}`
+        )
+    }
+
+    return qb
+}
+
 const getAll = async (query, user_id, role) => {
     const page = Math.max(parseInt(query.page) || 1, 1)
     const limit = Math.min(parseInt(query.limit) || 20, 100)
@@ -23,11 +39,7 @@ const getAll = async (query, user_id, role) => {
 
     countQb = roleResult.qb
 
-    if (role.code === "domainOfficer") {
-        countQb = countQb.or(
-            `and(status.eq.approved),and(change_by.eq.${user_id})`
-        )
-    }
+    countQb = applyVersionRole(countQb, role, user_id)
 
     countQb = applyFilters(countQb, query.filter)
 
@@ -62,11 +74,7 @@ const getAll = async (query, user_id, role) => {
 
     dataQb = roleResult2.qb
 
-    if (role.code === "domainOfficer") {
-        dataQb = dataQb.or(
-            `and(status.eq.approved),and(change_by.eq.${user_id})`
-        )
-    }
+    dataQb = applyVersionRole(dataQb, role, user_id)
 
     dataQb = applyFilters(dataQb, query.filter)
     dataQb = applySort(dataQb, query, ["created_at", "applied_at", "updated_at", "status"])
@@ -102,11 +110,7 @@ const getVersionById = async (id, user_id, role) => {
 
     qb = filteredQb
 
-    if (role.code === "domainOfficer") {
-        qb = qb.or(
-            `status.eq.approved,change_by.eq.${user_id}`
-        )
-    }
+    qb = applyVersionRole(qb, role, user_id)
 
     const { data, error } = await qb.single()
 
@@ -124,7 +128,6 @@ const createVersion = async (user_id, role, {
     version_data,
     legal_document_ids = []
 }) => {
-
     if (!role.domains?.includes(version_data.domain_id)) {
         throw new Error("Bạn không được phép tạo phiên bản cho lĩnh vực này.")
     }

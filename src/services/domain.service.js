@@ -86,7 +86,7 @@ const getById = async (id, role) => {
         .eq('id', id)
 
     if (role?.code === 'domainOfficer' || role?.code === 'approver') {
-        qb = qb.in('domain_id', role.domains)
+        qb = qb.in('id', role.domains)
     }
     const { data, error } = await qb.single()
 
