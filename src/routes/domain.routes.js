@@ -13,4 +13,6 @@ router.post('/', checkRole(['admin']), domainController.create)
 router.patch('/:id', checkRole(['admin']), domainController.update)
 router.delete('/:id', checkRole(['admin']), domainController.remove)
 
+router.get('/lookup', domainController.lookup)
+
 export default router

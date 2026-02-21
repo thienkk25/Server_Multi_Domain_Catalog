@@ -101,6 +101,21 @@ const getById = async (id, role) => {
     return data
 }
 
+const lookup = async (role) => {
+    let qb = supabase
+        .from(TABLE_NAME)
+        .select('id, code, name')
+
+    if (role?.code === 'domainOfficer') {
+        qb = qb.in('id', role.domains)
+    }
+
+    const { data, error } = await qb
+
+    if (error) throw error
+    return data
+}
+
 const create = async (payload) => {
     const { data, error } = await supabase
         .from(TABLE_NAME)
@@ -139,5 +154,5 @@ const remove = async (id) => {
 }
 
 export const domainService = {
-    getAll, getById, create, update, remove
+    getAll, getById, create, update, remove, lookup
 }

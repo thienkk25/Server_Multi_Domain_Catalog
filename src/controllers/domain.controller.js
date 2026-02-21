@@ -8,4 +8,5 @@ export const domainController = {
     create: handle(req => domainService.create(req.body)),
     update: handle(req => domainService.update(req.params.id, req.body)),
     remove: handle(req => domainService.remove(req.params.id)),
+    lookup: handle(req => domainService.lookup(req.role)),
 };

@@ -13,4 +13,6 @@ router.post('/', checkRole(['admin', 'domainOfficer']), categoryGroupController.
 router.patch('/:id', checkRole(['admin', 'domainOfficer']), categoryGroupController.update)
 router.delete('/:id', checkRole(['admin', 'domainOfficer']), categoryGroupController.remove)
 
+router.get('/lookup', categoryGroupController.lookup)
+
 export default router

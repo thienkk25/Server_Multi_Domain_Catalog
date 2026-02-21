@@ -127,7 +127,24 @@ const getById = async (id, role) => {
     return data
 }
 
-const create = async (payload) => {
+const lookup = async (role, { domain_id }) => {
+    let qb = supabase
+        .from(TABLE_NAME)
+        .select('id, code, name')
+
+    if (role?.code === 'domainOfficer') {
+        qb = qb.in('domain_id', role.domains)
+    }
+
+    qb = qb.eq('domain_id', domain_id)
+
+    const { data, error } = await qb
+
+    if (error) throw error
+    return data
+}
+
+const create = async (role, payload) => {
     if (!role.domains?.includes(payload.domain_id)) {
         throw new Error("Bạn không được phép tạo nhóm cho lĩnh vực này.")
     }
@@ -147,7 +164,7 @@ const create = async (payload) => {
     return data
 }
 
-const update = async (id, payload) => {
+const update = async (id, role, payload) => {
     if (!role.domains?.includes(payload.domain_id)) {
         throw new Error("Bạn không được phép cập nhật nhóm cho lĩnh vực này.")
     }
@@ -163,7 +180,7 @@ const update = async (id, payload) => {
     return data
 }
 
-const remove = async (id) => {
+const remove = async (id, role) => {
 
     const { data: payload, error: payloadError } = await supabase
         .from(TABLE_NAME)
@@ -186,5 +203,5 @@ const remove = async (id) => {
 }
 
 export const categoryGroupService = {
-    getAll, getById, create, update, remove
+    getAll, getById, create, update, remove, lookup
 }
