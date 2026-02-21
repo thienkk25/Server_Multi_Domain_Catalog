@@ -127,21 +127,71 @@ const getById = async (id, role) => {
     return data
 }
 
-const lookup = async (role, { domain_id }) => {
-    let qb = supabase
-        .from(TABLE_NAME)
-        .select('id, code, name')
+const lookup = async (role, query) => {
+    const page = Math.max(parseInt(query.page) || 1, 1)
+    const limit = Math.min(parseInt(query.limit) || 20, 100)
+    const offset = (page - 1) * limit
 
-    if (role?.code === 'domainOfficer') {
-        qb = qb.in('domain_id', role.domains)
+    let countQb = supabase
+        .from(TABLE_NAME)
+        .select("id", { count: "exact", head: true })
+
+    const roleResult = applyRoleFilter(countQb, role, "domain_id")
+
+    if (roleResult.restricted) {
+        return emptyPagination(page, limit)
     }
 
-    qb = qb.eq('domain_id', domain_id)
+    countQb = roleResult.qb
 
-    const { data, error } = await qb
+    const { count, error: countError } = await countQb
+    if (countError) throw countError
+
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
+
+    if (page > totalPages && totalPages !== 0) {
+        return {
+            data: [],
+            pagination: {
+                page,
+                limit,
+                total,
+                total_pages: totalPages,
+                has_more: false
+            }
+        }
+    }
+
+    let dataQb = supabase
+        .from(TABLE_NAME)
+        .select("id, code, name")
+
+    const roleResult2 = applyRoleFilter(dataQb, role, "domain_id")
+
+    if (roleResult2.restricted) {
+        return emptyPagination(page, limit)
+    }
+
+    dataQb = roleResult2.qb
+
+    dataQb = dataQb.eq("domain_id", query.domain_id)
+
+    const { data, error } = await dataQb
+        .range(offset, offset + limit - 1)
 
     if (error) throw error
-    return data
+
+    return {
+        data,
+        pagination: {
+            page,
+            limit,
+            total,
+            total_pages: totalPages,
+            has_more: page < totalPages
+        }
+    }
 }
 
 const create = async (role, payload) => {
