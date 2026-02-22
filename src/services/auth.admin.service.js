@@ -208,8 +208,6 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
     return getById(userId)
 }
 
-
-
 export const authAdminService = {
     getAll, getById, create, update, remove, activateUser, deactivateUser, grantUserAccess
 }
