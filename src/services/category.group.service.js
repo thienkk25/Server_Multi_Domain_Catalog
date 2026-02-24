@@ -132,14 +132,15 @@ const lookup = async (role, query) => {
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
 
-    if (!query.domain_id) {
-        throw new Error("domain_id is required")
+
+    if (!Array.isArray(query.domain_ids)) {
+        query.domain_ids = query.domain_ids ? [query.domain_ids] : [];
     }
 
     let countQb = supabase
         .from(TABLE_NAME)
         .select("id", { count: "exact", head: true })
-        .eq("domain_id", query.domain_id)
+        .in("domain_id", query.domain_ids)
 
     const roleCount = applyRoleFilter(countQb, role, "domain_id")
     if (roleCount.restricted) return emptyPagination(page, limit)
@@ -153,7 +154,7 @@ const lookup = async (role, query) => {
     let dataQb = supabase
         .from(TABLE_NAME)
         .select("id, code, name")
-        .eq("domain_id", query.domain_id)
+        .in("domain_id", query.domain_ids)
 
     const roleData = applyRoleFilter(dataQb, role, "domain_id")
     if (roleData.restricted) return emptyPagination(page, limit)

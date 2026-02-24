@@ -34,17 +34,41 @@ export const applySearch = (qb, search, fields = []) => {
 
 export const applyFilters = (qb, filters = {}) => {
     for (const key in filters) {
-        const value = filters[key]
+        let value = filters[key];
 
-        if (Array.isArray(value) && value.length > 0) {
-            qb = qb.in(key, value)
-        } else if (typeof value === "string" && value.trim() !== "") {
-            qb = qb.eq(key, value)
+        if (value == null) continue;
+
+        // Nếu string rỗng → bỏ qua
+        if (typeof value === "string") {
+            value = value.trim();
+            if (!value) continue;
+
+            // Nếu có dấu phẩy → convert thành array
+            if (value.includes(",")) {
+                value = value.split(",").map(v => v.trim()).filter(Boolean);
+            }
+        }
+
+        // Nếu là array
+        if (Array.isArray(value)) {
+            if (value.length === 0) continue;
+
+            if (value.length === 1) {
+                qb = qb.eq(key, value[0]); // chọn 1 → eq
+            } else {
+                qb = qb.in(key, value);    // nhiều → in
+            }
+            continue;
+        }
+
+        // Nếu là string đơn
+        if (typeof value === "string") {
+            qb = qb.eq(key, value);
         }
     }
 
-    return qb
-}
+    return qb;
+};
 
 export const applySort = (qb, query, allowedFields = []) => {
     const sortBy = allowedFields.includes(query.sortBy)
