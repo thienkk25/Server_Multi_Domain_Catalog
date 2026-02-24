@@ -35,33 +35,40 @@ export const applySearch = (qb, search, fields = []) => {
 export const applyFilters = (qb, filters = {}) => {
     for (const key in filters) {
         let value = filters[key];
-
         if (value == null) continue;
 
-        // Nếu string rỗng → bỏ qua
+        // Handle string
         if (typeof value === "string") {
             value = value.trim();
             if (!value) continue;
 
-            // Nếu có dấu phẩy → convert thành array
             if (value.includes(",")) {
                 value = value.split(",").map(v => v.trim()).filter(Boolean);
             }
         }
 
-        // Nếu là array
-        if (Array.isArray(value)) {
-            if (value.length === 0) continue;
+        // ===== JSONB role =====
+        if (key === "role_code") {
+            qb = qb.eq("role->>code", value);
+            continue;
+        }
 
+        // // ===== JSONB domains array =====
+        // if (key === "domain_id") {
+        //     qb = qb.contains("domains", [{ id: value }]);
+        //     continue;
+        // }
+
+        // ===== Normal columns =====
+        if (Array.isArray(value)) {
             if (value.length === 1) {
-                qb = qb.eq(key, value[0]); // chọn 1 → eq
+                qb = qb.eq(key, value[0]);
             } else {
-                qb = qb.in(key, value);    // nhiều → in
+                qb = qb.in(key, value);
             }
             continue;
         }
 
-        // Nếu là string đơn
         if (typeof value === "string") {
             qb = qb.eq(key, value);
         }
