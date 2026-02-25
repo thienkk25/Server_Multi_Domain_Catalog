@@ -41,7 +41,7 @@ const getAll = async (query) => {
         .from(TABLE_NAME)
         .select("*")
 
-    dataQb = applySearch(dataQb, query.search, ["method", "action", "timestamp"])
+    dataQb = applySearch(dataQb, query.search, ["method", "action"])
     dataQb = applyFilters(dataQb, query.filter)
     dataQb = applySort(dataQb, query, ["timestamp", 'action', 'method'])
 
