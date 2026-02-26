@@ -143,7 +143,7 @@ const update = async (id, payload, file) => {
 
     if (error) throw error
 
-    if (fileInfo && oldDoc?.file_url != fileUrl) {
+    if (fileInfo && oldDoc.file_url != null && oldDoc?.file_url != fileUrl) {
         await supabase.storage
             .from('legal_document_file')
             .remove([oldDoc.file_url.split('legal_document_file/').pop()])
@@ -161,7 +161,7 @@ const remove = async (id) => {
         .eq('id', id)
         .single()
 
-    if (fileUrl) {
+    if (fileUrl && fileUrl.file_url != null) {
         await supabase.storage
             .from('legal_document_file')
             .remove([fileUrl.file_url.split('legal_document_file/').pop()])

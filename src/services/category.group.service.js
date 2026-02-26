@@ -177,7 +177,7 @@ const lookup = async (role, query) => {
 }
 
 const create = async (role, payload) => {
-    if (!role.domains?.includes(payload.domain_id)) {
+    if (!role.domains?.includes(payload.domain_id) && role.code !== 'admin') {
         throw new Error("Bạn không được phép tạo nhóm cho lĩnh vực này.")
     }
 
@@ -193,11 +193,11 @@ const create = async (role, payload) => {
         }
         throw error
     }
-    return data
+    return getById(data.id, role)
 }
 
 const update = async (id, role, payload) => {
-    if (!role.domains?.includes(payload.domain_id)) {
+    if (!role.domains?.includes(payload.domain_id) && role.code !== 'admin') {
         throw new Error("Bạn không được phép cập nhật nhóm cho lĩnh vực này.")
     }
 
@@ -209,7 +209,7 @@ const update = async (id, role, payload) => {
         .single();
 
     if (error) throw error
-    return data
+    return getById(data.id, role)
 }
 
 const remove = async (id, role) => {
@@ -222,7 +222,7 @@ const remove = async (id, role) => {
 
     if (payloadError) throw payloadError
 
-    if (!role.domains?.includes(payload.domain_id)) {
+    if (!role.domains?.includes(payload.domain_id) && role.code !== 'admin') {
         throw new Error("Bạn không được phép xóa nhóm cho lĩnh vực này.")
     }
 

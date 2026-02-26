@@ -205,6 +205,8 @@ const grantUserAccess = async (userId, roleId, domainIds = []) => {
 
     if (domainError) throw domainError
 
+    await supabase.auth.admin.signOut(userId)
+
     return getById(userId)
 }
 
