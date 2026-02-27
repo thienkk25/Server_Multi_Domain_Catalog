@@ -96,6 +96,61 @@ const getAll = async (query, user_id, role) => {
     }
 }
 
+const getHistoryVersion = async (item_id, role, query) => {
+    const page = Math.max(parseInt(query.page) || 1, 1)
+    const limit = Math.min(parseInt(query.limit) || 20, 100)
+    const offset = (page - 1) * limit
+    let countQb = supabase
+        .from(TABLE_NAME)
+        .select("id", { count: "exact", head: true })
+
+    countQb = countQb.eq("item_id", item_id)
+    countQb = countQb.eq("status", 'approved')
+
+    const { count, error: countError } = await countQb
+    if (countError) throw countError
+
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
+
+    if (page > totalPages && totalPages !== 0) {
+        return {
+            data: [],
+            pagination: {
+                page,
+                limit,
+                total,
+                total_pages: totalPages,
+                has_more: false
+            }
+        }
+    }
+
+    let dataQb = supabase
+        .from(TABLE_NAME)
+        .select("*")
+
+    dataQb = dataQb.eq("item_id", item_id)
+    dataQb = dataQb.eq("status", 'approved')
+    dataQb = applySort(dataQb, query, ["created_at", "applied_at", "updated_at", "status"])
+
+    const { data, error } = await dataQb
+        .range(offset, offset + limit - 1)
+
+    if (error) throw error
+
+    return {
+        data,
+        pagination: {
+            page,
+            limit,
+            total,
+            total_pages: totalPages,
+            has_more: page < totalPages
+        }
+    }
+}
+
 const getVersionById = async (id, user_id, role) => {
 
     let qb = supabase
@@ -212,9 +267,9 @@ const updateVersion = async (id, user_id, role, {
     return getVersionById(versionId, user_id, role)
 }
 
-const deleteVersion = async (id, user_id, role) => {
+const deleteVersion = async (id, user_id, role, { domain_id }) => {
 
-    if (!role.domains?.includes(version_data.domain_id)) {
+    if (!role.domains?.includes(domain_id)) {
         throw new Error("Bạn không được phép xóa phiên bản cho lĩnh vực này.")
     }
 
@@ -223,7 +278,8 @@ const deleteVersion = async (id, user_id, role) => {
             'do_delete_category_item_version',
             {
                 p_item_id: id,
-                p_user_id: user_id
+                p_user_id: user_id,
+                p_domain_id: domain_id
             }
         )
 
@@ -238,7 +294,11 @@ const approveVersion = async (id, user_id, role) => {
     const { error } = await supabase
         .rpc(
             'approve_category_item_version',
-            { p_version_id: id }
+            {
+                p_version_id: id,
+                p_user_id: user_id
+
+            }
         )
 
     if (error) throw error;
@@ -252,6 +312,7 @@ const rejectVersion = async (id, rejectReason, user_id, role) => {
             'reject_category_item_version',
             {
                 p_version_id: id,
+                p_user_id: user_id,
                 p_reject_reason: rejectReason
             }
         )
@@ -299,5 +360,5 @@ const rollbackVersion = async (id, user_id, role) => {
 }
 
 export const categoryItemVersionService = {
-    getAll, getVersionById, createVersion, updateVersion, deleteVersion, approveVersion, rejectVersion, remove, rollbackVersion
+    getAll, getVersionById, createVersion, updateVersion, deleteVersion, approveVersion, rejectVersion, remove, rollbackVersion, getHistoryVersion
 }

@@ -12,7 +12,7 @@ router.get('/:id', apiKeyController.getById)
 
 router.post('/', apiKeyController.create)
 
-router.patch('/:id', apiKeyController.update)
+router.patch('/:id', apiKeyController.revoke)
 router.delete('/:id', apiKeyController.remove)
 
 export default router

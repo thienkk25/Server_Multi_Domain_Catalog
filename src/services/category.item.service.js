@@ -115,7 +115,7 @@ const create = async (user_id, role, {
             'admin_create_item',
             {
                 p_data: category_item,
-                user_id: user_id
+                p_user_id: user_id
             }
         )
 
@@ -147,7 +147,7 @@ const update = async (id, user_id, role, {
             {
                 p_item_id: id,
                 p_new_value: category_item,
-                user_id: user_id
+                p_user_id: user_id
             }
         )
 

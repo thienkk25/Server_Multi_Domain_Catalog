@@ -90,10 +90,10 @@ const create = async (payload) => {
     return data
 }
 
-const update = async (id, payload) => {
+const revoke = async (id) => {
     const { data, error } = await supabase
         .from(TABLE_NAME)
-        .update(payload)
+        .update({ status: 'revoked' })
         .eq('id', id)
         .select()
         .single();
@@ -112,5 +112,5 @@ const remove = async (id) => {
 }
 
 export const apiKeyService = {
-    getAll, getById, create, update, remove
+    getAll, getById, create, revoke, remove
 }
