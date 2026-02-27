@@ -6,8 +6,8 @@ import { categoryItemVersionController } from "../controllers/category.item.vers
 const router = Router()
 
 router.get('/', checkRole(['admin', 'approver', 'domainOfficer']), categoryItemVersionController.getAll)
-router.get('/:id', checkRole(['admin', 'approver', 'domainOfficer']), categoryItemVersionController.getById)
 router.get('/:id/history', checkRole(['admin', 'approver', 'domainOfficer']), categoryItemVersionController.getHistoryVersion)
+router.get('/:id', checkRole(['admin', 'approver', 'domainOfficer']), categoryItemVersionController.getById)
 
 // domain officer
 router.post('/', checkRole(['domainOfficer']), categoryItemVersionController.createVersion)

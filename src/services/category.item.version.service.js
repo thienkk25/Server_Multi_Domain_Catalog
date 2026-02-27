@@ -28,7 +28,7 @@ const getAll = async (query, user_id, role) => {
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
     let countQb = supabase
-        .from(TABLE_NAME)
+        .from('category_item_version_view')
         .select("id", { count: "exact", head: true })
 
     const roleResult = applyRoleFilter(countQb, role, "domain_id")
@@ -63,7 +63,7 @@ const getAll = async (query, user_id, role) => {
     }
 
     let dataQb = supabase
-        .from(TABLE_NAME)
+        .from('category_item_version_view')
         .select("*")
 
     const roleResult2 = applyRoleFilter(dataQb, role, "domain_id")
@@ -101,7 +101,7 @@ const getHistoryVersion = async (item_id, role, query) => {
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
     let countQb = supabase
-        .from(TABLE_NAME)
+        .from('category_item_version_view')
         .select("id", { count: "exact", head: true })
 
     countQb = countQb.eq("item_id", item_id)
@@ -127,7 +127,7 @@ const getHistoryVersion = async (item_id, role, query) => {
     }
 
     let dataQb = supabase
-        .from(TABLE_NAME)
+        .from('category_item_version_view')
         .select("*")
 
     dataQb = dataQb.eq("item_id", item_id)
@@ -154,7 +154,7 @@ const getHistoryVersion = async (item_id, role, query) => {
 const getVersionById = async (id, user_id, role) => {
 
     let qb = supabase
-        .from(TABLE_NAME)
+        .from('category_item_version_view')
         .select("*")
         .eq("id", id)
 
@@ -214,7 +214,9 @@ const updateVersion = async (id, user_id, role, {
     version_data,
     legal_document_ids = []
 }) => {
-
+    if (version_type == undefined || version_type == null || version_type == 'undefined') {
+        version_type = 0
+    }
     if (!role.domains?.includes(version_data.domain_id)) {
         throw new Error("Bạn không được phép cập nhật phiên bản cho lĩnh vực này.")
     }
