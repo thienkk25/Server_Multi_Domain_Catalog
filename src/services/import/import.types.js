@@ -3,4 +3,5 @@ export const IMPORT_TYPE = {
     CATEGORY_GROUP: 2,
     CATEGORY_ITEM: 3,
     API_KEY: 4,
+    USERS_MANAGEMENT: 5
 };

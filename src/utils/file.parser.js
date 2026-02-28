@@ -14,7 +14,7 @@ export const parseFileToRows = async (filePath) => {
         return parseXlsx(filePath);
     }
 
-    throw new Error('Unsupported file type');
+    throw new Error('Chỉ hỗ trợ CSV hoặc XLSX');
 };
 
 const parseCsv = async (filePath) => {
