@@ -356,7 +356,12 @@ const rollbackVersion = async (id, user_id, role) => {
             }
         )
 
-    if (error) throw error
+    if (error) {
+        if (error.code === '23505') {
+            throw new Error('Không thể khôi phục phiên bản này. Mã hoặc tên mục danh mục đã tồn tại');
+        }
+        throw error
+    }
 
     return getVersionById(versionId, user_id, role)
 }
