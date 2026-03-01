@@ -73,49 +73,56 @@ export const importCategoryItemOnly = async (filePath, userId, role) => {
 
         if (role.code === 'admin') {
 
-            const { domain_id, ...dataWithoutDomain } = row;
+            try {
+                const { domain_id, ...dataWithoutDomain } = row;
 
-            const { error: rpcError } = await supabase.rpc(
-                'admin_create_item',
-                {
-                    p_data: dataWithoutDomain,
-                    p_user_id: userId
-                }
-            );
+                const { error } = await supabase.rpc(
+                    'admin_create_item',
+                    {
+                        p_data: dataWithoutDomain,
+                        p_user_id: userId
+                    }
+                );
 
-            if (rpcError) {
+                if (error) throw error
+                results.push({
+                    code: row.code,
+                    status: 'success'
+                });
+            } catch (error) {
                 results.push({
                     code: row.code,
                     status: 'failed',
-                    message: rpcError.message
+                    message: error.message
                 });
-                continue;
             }
 
         } else if (role.code === 'domainOfficer') {
 
-            const { error: rpcError } = await supabase.rpc(
-                'do_create_category_item_version',
-                {
-                    p_new_data: row,
-                    p_user_id: userId
-                }
-            );
+            try {
+                const { error } = await supabase.rpc(
+                    'do_create_category_item_version',
+                    {
+                        p_new_data: row,
+                        p_user_id: userId
+                    }
+                );
 
-            if (rpcError) {
+                if (error) throw error
+                results.push({
+                    code: row.code,
+                    status: 'success'
+                });
+            } catch (error) {
                 results.push({
                     code: row.code,
                     status: 'failed',
-                    message: rpcError.message
+                    message: error.message
                 });
-                continue;
             }
         }
 
-        results.push({
-            code: row.code,
-            status: 'success'
-        });
+
     }
 
     return {

@@ -130,28 +130,29 @@ export const importCatalogService = async (filePath, user) => {
         });
 
     for (const row of itemPayload) {
+        try {
+            const { error } = await supabase.rpc(
+                'admin_create_item',
+                {
+                    p_data: row,
+                    p_user_id: user.id
+                }
+            );
 
-        const { error: rpcError } = await supabase.rpc(
-            'admin_create_item',
-            {
-                p_data: row,
-                p_user_id: user.id
-            }
-        );
+            if (error) throw error;
 
-        if (rpcError) {
+            results.push({
+                code: row.code,
+                status: 'success'
+            });
+
+        } catch (err) {
             results.push({
                 code: row.code,
                 status: 'failed',
-                message: rpcError.message
+                message: err.message
             });
-            continue;
         }
-
-        results.push({
-            code: row.code,
-            status: 'success'
-        });
     }
 
     return {
