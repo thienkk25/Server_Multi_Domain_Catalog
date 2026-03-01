@@ -8,20 +8,17 @@ export const importApiKey = async (filePath) => {
         throw new Error('File không có dữ liệu');
     }
 
-    // Lấy tất cả domain codes
     const domainCodes = [
         ...new Set(
-            rows
-                .flatMap(r =>
-                    r.allowed_domains
-                        ?.split(',')
-                        .map(d => d.trim())
-                        .filter(Boolean) || []
-                )
+            rows.flatMap(r =>
+                (r.allowed_domains || '')
+                    .split(',')
+                    .map(d => d.trim())
+                    .filter(Boolean)
+            )
         )
     ];
 
-    // Load domain map
     let domainMap = {};
 
     if (domainCodes.length) {
@@ -37,36 +34,76 @@ export const importApiKey = async (filePath) => {
         );
     }
 
+    const insertData = [];
     const results = [];
 
     for (const row of rows) {
         try {
-
-            const codes = [... new Set(row.allowed_domains?.split(',')
-                .map(d => d.trim())
-                .filter(Boolean) || [])];
-
-            const missingDomains = codes.filter(c => !domainMap[c]);
-            if (missingDomains.length) {
-                throw new Error(`Domain không tồn tại: ${missingDomains.join(', ')}`);
+            // Validate system_name
+            if (!row.system_name?.trim()) {
+                throw new Error('Thiếu system_name');
             }
 
-            const { error } = await supabase
-                .from('api_key')
-                .insert({
-                    system_name: row.system_name,
-                    allowed_domains: codes
-                });
+            const systemName = row.system_name.trim();
 
-            if (error) throw error;
+            // Parse allowed domains
+            const codes = [
+                ...new Set(
+                    (row.allowed_domains || '')
+                        .split(',')
+                        .map(d => d.trim())
+                        .filter(Boolean)
+                )
+            ];
 
-            results.push({ systemName: row.system_name, status: 'success' });
+            // Check domain tồn tại
+            const missingDomains = codes.filter(c => !domainMap[c]);
+            if (missingDomains.length) {
+                throw new Error(
+                    `Domain không tồn tại: ${missingDomains.join(', ')}`
+                );
+            }
+
+            insertData.push({
+                system_name: systemName,
+                allowed_domains: codes.length ? codes : null
+            });
+
+            results.push({
+                systemName,
+                status: 'pending'
+            });
 
         } catch (err) {
             results.push({
-                systemName: row.system_name,
+                systemName: row.system_name || null,
                 status: 'failed',
                 error: err.message
+            });
+        }
+    }
+
+    if (insertData.length) {
+        const { error } = await supabase
+            .from('api_key')
+            .upsert(insertData, {
+                onConflict: 'system_name'
+            });
+
+        if (error) {
+            // Nếu batch fail -> mark tất cả pending thành failed
+            results.forEach(r => {
+                if (r.status === 'pending') {
+                    r.status = 'failed';
+                    r.error = error.message;
+                }
+            });
+        } else {
+            // Mark thành success
+            results.forEach(r => {
+                if (r.status === 'pending') {
+                    r.status = 'success';
+                }
             });
         }
     }
@@ -77,5 +114,4 @@ export const importApiKey = async (filePath) => {
         failed: results.filter(r => r.status === 'failed').length,
         errors: results.filter(r => r.status === 'failed')
     };
-
 };
