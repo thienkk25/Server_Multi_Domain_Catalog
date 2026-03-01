@@ -10,14 +10,13 @@ export const importCategoryItemOnly = async (filePath, userId, role) => {
 
     // Trim dữ liệu
     rows = rows.map(r => ({
-        ...r,
         code: r.code?.trim(),
         name: r.name?.trim(),
         description: r.description?.trim(),
         group_code: r.group_code?.trim()
     }));
 
-    const groupCodes = [...new Set(rows.map(r => r.group_code))];
+    const groupCodes = [...new Set(rows.map(r => r.group_code).filter(Boolean))];
 
     if (!groupCodes.length) {
         throw new Error('File không có group_code');
@@ -29,12 +28,10 @@ export const importCategoryItemOnly = async (filePath, userId, role) => {
         .in('code', groupCodes);
 
     if (error) throw new Error(error.message);
-
     if (!categoryGroups?.length) {
         throw new Error('Không tìm thấy nhóm tương ứng');
     }
 
-    // Filter theo quyền domainOfficer
     let filteredGroups = categoryGroups;
 
     if (role.code === 'domainOfficer') {
@@ -50,48 +47,81 @@ export const importCategoryItemOnly = async (filePath, userId, role) => {
     }
 
     const groupMap = Object.fromEntries(
-        filteredGroups.map(g => [g.code, g.id])
+        filteredGroups.map(g => [
+            g.code,
+            { id: g.id, domain_id: g.domain_id }
+        ])
     );
 
-    for (const row of rows) {
-        if (!groupMap[row.group_code]) {
-            throw new Error(`Nhóm không tồn tại hoặc không có quyền: ${row.group_code}`);
+    const payload = rows.map(r => {
+        if (!groupMap[r.group_code]) {
+            throw new Error(`Nhóm không tồn tại hoặc không có quyền: ${r.group_code}`);
         }
-    }
 
-    const payload = rows.map(r => ({
-        code: r.code,
-        name: r.name,
-        description: r.description,
-        group_id: groupMap[r.group_code],
-    }));
+        return {
+            code: r.code,
+            name: r.name,
+            description: r.description,
+            group_id: groupMap[r.group_code].id,
+            domain_id: groupMap[r.group_code].domain_id
+        };
+    });
 
-    if (role.code === 'admin') {
-        const { error: upsertError } = await supabase
-            .from('category_item')
-            .upsert(payload, { onConflict: 'code' });
+    const results = [];
 
-        if (upsertError) {
-            throw new Error(upsertError.message);
-        }
-    } else if (role.code === 'domainOfficer') {
+    for (const row of payload) {
 
-        for (const row of payload) {
+        if (role.code === 'admin') {
 
-            const { error: rpcError } = await supabase
-                .rpc('do_create_category_item_version', {
-                    p_new_data: row,
+            const { domain_id, ...dataWithoutDomain } = row;
+
+            const { error: rpcError } = await supabase.rpc(
+                'admin_create_item',
+                {
+                    p_data: dataWithoutDomain,
                     p_user_id: userId
-                });
+                }
+            );
 
             if (rpcError) {
-                throw new Error(
-                    `Lỗi khi tạo version cho item ${row.code}: ${rpcError.message}`
-                );
+                results.push({
+                    code: row.code,
+                    status: 'failed',
+                    message: rpcError.message
+                });
+                continue;
+            }
+
+        } else if (role.code === 'domainOfficer') {
+
+            const { error: rpcError } = await supabase.rpc(
+                'do_create_category_item_version',
+                {
+                    p_new_data: row,
+                    p_user_id: userId
+                }
+            );
+
+            if (rpcError) {
+                results.push({
+                    code: row.code,
+                    status: 'failed',
+                    message: rpcError.message
+                });
+                continue;
             }
         }
+
+        results.push({
+            code: row.code,
+            status: 'success'
+        });
     }
 
-    return { count: payload.length };
+    return {
+        total: rows.length,
+        success: results.filter(r => r.status === 'success').length,
+        failed: results.filter(r => r.status === 'failed').length,
+        errors: results.filter(r => r.status === 'failed')
+    };
 };
-

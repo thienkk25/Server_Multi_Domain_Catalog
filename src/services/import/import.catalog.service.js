@@ -22,7 +22,6 @@ export const importCatalogService = async (filePath, user) => {
         item_description: r.item_description?.trim()
     }));
 
-    // UPSERT DOMAIN
     const domainPayload = [
         ...new Map(
             rows
@@ -46,13 +45,15 @@ export const importCatalogService = async (filePath, user) => {
         if (error) throw new Error(error.message);
     }
 
-    // Load domain map theo code có trong file
-    const domainCodes = domainPayload.map(d => d.code);
+    // Load ALL domain codes từ file (không chỉ domainPayload)
+    const allDomainCodes = [
+        ...new Set(rows.map(r => r.domain_code).filter(Boolean))
+    ];
 
     const { data: domains, error: domainFetchError } = await supabase
         .from('domain')
         .select('id, code')
-        .in('code', domainCodes);
+        .in('code', allDomainCodes);
 
     if (domainFetchError) throw new Error(domainFetchError.message);
 
@@ -60,7 +61,6 @@ export const importCatalogService = async (filePath, user) => {
         (domains || []).map(d => [d.code, d.id])
     );
 
-    // UPSERT GROUP
     const groupPayload = [
         ...new Map(
             rows
@@ -93,8 +93,9 @@ export const importCatalogService = async (filePath, user) => {
         if (error) throw new Error(error.message);
     }
 
-    // Load group map theo code có trong file
-    const groupCodes = groupPayload.map(g => g.code);
+    const groupCodes = [
+        ...new Set(rows.map(r => r.group_code).filter(Boolean))
+    ];
 
     const { data: groups, error: groupFetchError } = await supabase
         .from('category_group')
@@ -107,43 +108,58 @@ export const importCatalogService = async (filePath, user) => {
         (groups || []).map(g => [g.code, g.id])
     );
 
-    // UPSERT ITEM
-    const itemPayload = [
-        ...new Map(
-            rows
-                .filter(r => r.item_code)
-                .map(r => {
-                    const groupId = groupMap[r.group_code];
+    const results = [];
 
-                    if (!groupId) {
-                        throw new Error(`Group không tồn tại: ${r.group_code}`);
-                    }
+    const itemPayload = rows
+        .filter(r => r.item_code)
+        .map(r => {
+            const groupId = groupMap[r.group_code];
 
-                    return [
-                        r.item_code,
-                        {
-                            code: r.item_code,
-                            name: r.item_name,
-                            description: r.item_description || null,
-                            group_id: groupId,
-                            created_by: user.id
-                        }
-                    ];
-                })
-        ).values()
-    ];
+            if (!groupId) {
+                throw new Error(`Group không tồn tại: ${r.group_code}`);
+            }
 
-    if (itemPayload.length) {
-        const { error } = await supabase
-            .from('category_item')
-            .upsert(itemPayload, { onConflict: 'code' });
+            return {
+                code: r.item_code,
+                name: r.item_name,
+                description: r.item_description || null,
+                group_id: groupId,
+                domain_id: domainMap[r.domain_code],
+                status: 'active'
+            };
+        });
 
-        if (error) throw new Error(error.message);
+    for (const row of itemPayload) {
+
+        const { error: rpcError } = await supabase.rpc(
+            'admin_create_item',
+            {
+                p_data: row,
+                p_user_id: user.id
+            }
+        );
+
+        if (rpcError) {
+            results.push({
+                code: row.code,
+                status: 'failed',
+                message: rpcError.message
+            });
+            continue;
+        }
+
+        results.push({
+            code: row.code,
+            status: 'success'
+        });
     }
 
     return {
         domains: domainPayload.length,
         groups: groupPayload.length,
-        items: itemPayload.length
+        items: itemPayload.length,
+        success: results.filter(r => r.status === 'success').length,
+        failed: results.filter(r => r.status === 'failed').length,
+        errors: results.filter(r => r.status === 'failed')
     };
 };
