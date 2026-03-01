@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { checkRole } from '../middlewares/role.middleware.js'
 import { uploadCsv } from '../middlewares/upload.middleware.js';
 import {
@@ -10,7 +9,7 @@ import {
 const router = Router()
 
 // Import 1 bảng 
-router.post('/single', checkRole(['admin']), uploadCsv.single('file'), importSingleController);
+router.post('/single', checkRole(['admin', 'domainOfficer']), uploadCsv.single('file'), importSingleController);
 
 // Import domain + group + item chung
 router.post('/catalog', checkRole(['admin']), uploadCsv.single('file'), importCatalogController);

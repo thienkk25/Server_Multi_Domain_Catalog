@@ -5,7 +5,11 @@ export const importSingleController = async (req, res) => {
     const { type } = req.body;
     const file = req.file;
 
-    const result = await importSingleService(file.path, Number(type));
+    const user = req.user;
+
+    const role = req.role;
+
+    const result = await importSingleService(file.path, Number(type), user, role);
 
     res.json({
         success: true,
@@ -16,6 +20,7 @@ export const importSingleController = async (req, res) => {
 
 export const importCatalogController = async (req, res) => {
     const file = req.file;
-    const result = await importCatalogService(file.path);
+    const user = req.user;
+    const result = await importCatalogService(file.path, user);
     res.json({ success: true, result });
 };
