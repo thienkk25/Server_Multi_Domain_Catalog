@@ -130,7 +130,6 @@ paths:
     get:
       tags: [Public Catalog]
       summary: List category items (public catalog)
-      description: Response trả về `{ serverTime, items }`.
       security:
         - apiKeyAuth: []
       parameters:
@@ -1429,7 +1428,7 @@ components:
       schema:
         type: object
         additionalProperties: true
-      description: Deep object filters, ví dụ `filter[status]=active`
+      description: Filter dưới dạng JSON string, ví dụ `{"status":"active"}`
 
   responses:
     BadRequest:
