@@ -4,12 +4,23 @@ export const applyRoleFilter = (qb, role, field) => {
         throw new Error("Role filter requires domain field")
     }
 
-    if (!role) return { qb, restricted: false }
+    if (!role) {
+        return { qb, restricted: false }
+    }
 
+    // Admin full quyền
     if (role.code === "admin") {
         return { qb, restricted: false }
     }
 
+    // Các role bị giới hạn domain
+    const domainRestrictedRoles = ["domainOfficer", "approver"]
+
+    if (!domainRestrictedRoles.includes(role.code)) {
+        return { qb, restricted: false }
+    }
+
+    // Role bị giới hạn nhưng không có domain
     if (!Array.isArray(role.domains) || role.domains.length === 0) {
         return { qb, restricted: true }
     }
@@ -47,19 +58,13 @@ export const applyFilters = (qb, filters = {}) => {
             }
         }
 
-        // ===== JSONB role =====
+        // JSONB role
         if (key === "role_code") {
             qb = qb.eq("role->>code", value);
             continue;
         }
 
-        // // ===== JSONB domains array =====
-        // if (key === "domain_id") {
-        //     qb = qb.contains("domains", [{ id: value }]);
-        //     continue;
-        // }
-
-        // ===== Normal columns =====
+        //  Normal columns
         if (Array.isArray(value)) {
             if (value.length === 1) {
                 qb = qb.eq(key, value[0]);

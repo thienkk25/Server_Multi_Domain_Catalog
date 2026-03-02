@@ -13,7 +13,7 @@ export const apiKeyMiddleware = async (req, res, next) => {
 
         const { data, error } = await supabase
             .from("api_key")
-            .select("*")
+            .select("system_name,allowed_domains")
             .eq("key", apiKey)
             .eq("status", "active")
             .single()
@@ -25,7 +25,14 @@ export const apiKeyMiddleware = async (req, res, next) => {
             })
         }
 
-        req.apiKey = data
+        const allowedDomainIds = Array.isArray(data.allowed_domains)
+            ? data.allowed_domains.map(d => d.id)
+            : []
+
+        req.apiKey = {
+            system_name: data.system_name,
+            allowedDomainIds: allowedDomainIds
+        }
         next()
 
     } catch (err) {

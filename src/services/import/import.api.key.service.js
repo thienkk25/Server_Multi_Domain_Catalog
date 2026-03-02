@@ -24,13 +24,13 @@ export const importApiKey = async (filePath) => {
     if (domainCodes.length) {
         const { data: domains, error } = await supabase
             .from('domain')
-            .select('id, code')
+            .select('id, code, name')
             .in('code', domainCodes);
 
         if (error) throw error;
 
         domainMap = Object.fromEntries(
-            domains.map(d => [d.code, d.id])
+            domains.map(d => [d.code, { id: d.id, code: d.code, name: d.name }])
         );
     }
 
@@ -52,7 +52,7 @@ export const importApiKey = async (filePath) => {
                     (row.allowed_domains || '')
                         .split(',')
                         .map(d => d.trim())
-                        .filter(Boolean)
+                        .filter(Boolean).map(c => domainMap[c])
                 )
             ];
 

@@ -5,7 +5,7 @@ import {
     applySort
 } from '../utils/query.builder.js'
 
-const getAll = async (query, role, isPublic = false) => {
+const getAll = async (query, role) => {
     const page = Math.max(parseInt(query.page) || 1, 1)
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
@@ -13,10 +13,6 @@ const getAll = async (query, role, isPublic = false) => {
     let countQb = supabase
         .from("category_item_view")
         .select("id", { count: "exact", head: true })
-
-    if (isPublic) {
-        countQb = countQb.eq("status", "active")
-    }
 
     if (
         (role?.code === "domainOfficer" || role?.code === "approver") &&
@@ -52,10 +48,6 @@ const getAll = async (query, role, isPublic = false) => {
         .from("category_item_view")
         .select("*")
 
-    if (isPublic) {
-        dataQb = dataQb.eq("status", "active")
-    }
-
     if (
         (role?.code === "domainOfficer" || role?.code === "approver") &&
         Array.isArray(role?.domains) &&
@@ -85,15 +77,11 @@ const getAll = async (query, role, isPublic = false) => {
     }
 }
 
-const getById = async (id, role, isPublic = false) => {
+const getById = async (id, role) => {
     let qb = supabase
         .from('category_item_view')
         .select('*')
         .eq('id', id)
-
-    if (isPublic) {
-        qb = qb.eq('status', 'active')
-    }
 
     if (role?.code === 'domainOfficer' || role?.code === 'approver') {
         qb = qb.in('domain_id', role.domains)
