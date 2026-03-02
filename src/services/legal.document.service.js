@@ -217,6 +217,9 @@ const uploadFile = async (file) => {
 }
 
 const getSignedUrl = async (filePath) => {
+    if (!filePath || typeof filePath !== "string") {
+        throw new Error("file_path is required")
+    }
     const { data, error } = await supabase.storage
         .from('legal_document_file')
         .createSignedUrl(filePath, 60 * 5) // 5 phút

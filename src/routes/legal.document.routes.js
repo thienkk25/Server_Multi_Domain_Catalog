@@ -13,14 +13,13 @@ const upload = multer({
 const router = Router()
 
 router.get('/', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getAll)
-router.get('/:id', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getById)
 router.get('/documents/with-file', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getLegalDocumentsWithFile)
+router.get('/download', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getSignedUrl)
+router.get('/:id', checkRole(['admin', 'domainOfficer', 'approver']), legalDocumentController.getById)
 
 router.post('/', checkRole(['admin']), upload.single('file'), legalDocumentController.create)
 
 router.patch('/:id', checkRole(['admin']), upload.single('file'), legalDocumentController.update)
 router.delete('/:id', checkRole(['admin']), legalDocumentController.remove)
-
-router.get('/download', legalDocumentController.getSignedUrl)
 
 export default router

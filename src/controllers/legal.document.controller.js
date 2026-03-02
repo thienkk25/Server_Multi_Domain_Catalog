@@ -8,6 +8,6 @@ export const legalDocumentController = {
     create: handle(req => legalDocumentService.create(req.body, req.file)),
     update: handle(req => legalDocumentService.update(req.params.id, req.body, req.file)),
     remove: handle(req => legalDocumentService.remove(req.params.id)),
-    getSignedUrl: handle(req => legalDocumentService.getSignedUrl(req.file.path)),
+    getSignedUrl: handle(req => legalDocumentService.getSignedUrl(req.query.file_path || req.query.filePath)),
     getLegalDocumentsWithFile: handle(req => legalDocumentService.getLegalDocumentsWithFile(qs.parse(req.query)))
 };
