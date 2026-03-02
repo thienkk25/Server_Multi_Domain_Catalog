@@ -4,6 +4,7 @@ import { catalogController } from "../controllers/catalog.controller.js"
 const router = Router()
 
 router.get("/domains", catalogController.getDomains)
+router.get("/domains/:id", catalogController.getDomainById)
 
 router.get("/category-groups", catalogController.getCategoryGroups)
 router.get("/category-groups/:id", catalogController.getCategoryGroupById)

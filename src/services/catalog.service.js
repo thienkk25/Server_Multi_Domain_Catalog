@@ -106,13 +106,13 @@ const getDomainById = async (id, apiKey) => {
         throw new Error("Không có quyền truy cập domain này")
     }
 
-    const { data, error } = await result.qb.single()
+    const { data, error } = await result.qb.maybeSingle()
 
     if (error) throw error
     return data
 }
 
-const getCategoryGroups = async (queryParams, apiKey) => {
+const getCategoryGroups = async (query, apiKey) => {
     const page = Math.max(parseInt(query.page) || 1, 1)
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
@@ -196,24 +196,38 @@ const getCategoryGroups = async (queryParams, apiKey) => {
 
 const getCategoryGroupById = async (id, apiKey) => {
 
-    let query = supabase
+    let qb = supabase
         .from('category_group')
-        .select('*')
+        .select(`
+            id,
+            code,
+            name,
+            description,
+            domain:domain_id (
+                id,
+                code,
+                name
+            ),
+            created_at,
+            updated_at
+        `)
         .eq('id', id)
 
-    const result = applyDomainFilter(query, apiKey, 'domain_id')
+    const result = applyDomainFilter(qb, apiKey, 'domain_id')
 
     if (result.restricted) {
         throw new Error("Không có quyền truy cập nhóm này")
     }
 
-    const { data, error } = await result.qb.single()
+    qb = result.qb
+
+    const { data, error } = await qb.maybeSingle()
     if (error) throw error
 
     return data
 }
 
-const getCategoryItems = async (queryParams, apiKey) => {
+const getCategoryItems = async (query, apiKey) => {
 
     const page = Math.max(parseInt(query.page) || 1, 1)
     const limit = Math.min(parseInt(query.limit) || 20, 100)
@@ -285,32 +299,31 @@ const getCategoryItems = async (queryParams, apiKey) => {
 
 const getCategoryItemById = async (id, apiKey) => {
 
-    const { data, error } = await supabase
-        .from('category_item')
-        .select(`
-            id,
-            code,
-            name,
-            description,
-            group_id,
-            status,
-            created_at,
-            updated_at
-        `)
+    let qb = supabase
+        .from('category_item_view')
+        .select('*')
         .eq('id', id)
         .eq('status', 'active')
-        .single()
+
+    const result = applyDomainFilter(qb, apiKey, 'domain_id')
+
+    if (result.restricted) {
+        throw new Error("Không có quyền truy cập nhóm này")
+    }
+
+    const { data, error } = await result.qb.maybeSingle()
 
     if (error) throw error
 
     return data
 }
 
-const syncCategoryItems = async ({ updated_from }, apiKey) => {
+const syncCategoryItems = async (query, apiKey) => {
 
     const page = Math.max(parseInt(query.page) || 1, 1)
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
+    const { updated_from } = query
 
     let countQb = supabase
         .from("category_item_view")
@@ -318,16 +331,26 @@ const syncCategoryItems = async ({ updated_from }, apiKey) => {
         .eq("status", "active")
 
     if (updated_from) {
-        countQb = countQb.gte('updated_at', updated_from)
+        countQb = countQb.gte("updated_at", updated_from)
     }
 
-    const roleResult = applyDomainFilter(countQb, apiKey, "domain_id")
+    const countFilter = applyDomainFilter(countQb, apiKey, "domain_id")
 
-    if (roleResult.restricted) {
-        return emptyPagination(page, limit)
+    if (countFilter.restricted) {
+        return {
+            serverTime: new Date().toISOString(),
+            items: [],
+            pagination: {
+                page,
+                limit,
+                total: 0,
+                total_pages: 0,
+                has_more: false
+            }
+        }
     }
 
-    countQb = roleResult.qb
+    countQb = countFilter.qb
 
     countQb = applySearch(countQb, query.search, ["code", "name"])
     countQb = applyFilters(countQb, query.filter)
@@ -340,7 +363,8 @@ const syncCategoryItems = async ({ updated_from }, apiKey) => {
 
     if (page > totalPages && totalPages !== 0) {
         return {
-            data: [],
+            serverTime: new Date().toISOString(),
+            items: [],
             pagination: {
                 page,
                 limit,
@@ -357,20 +381,34 @@ const syncCategoryItems = async ({ updated_from }, apiKey) => {
         .eq("status", "active")
 
     if (updated_from) {
-        dataQb = dataQb.gte('updated_at', updated_from)
+        dataQb = dataQb.gte("updated_at", updated_from)
     }
 
-    const roleResult2 = applyDomainFilter(dataQb, apiKey, "domain_id")
+    const dataFilter = applyDomainFilter(dataQb, apiKey, "domain_id")
 
-    if (roleResult2.restricted) {
-        return emptyPagination(page, limit)
+    if (dataFilter.restricted) {
+        return {
+            serverTime: new Date().toISOString(),
+            items: [],
+            pagination: {
+                page,
+                limit,
+                total: 0,
+                total_pages: 0,
+                has_more: false
+            }
+        }
     }
 
-    dataQb = roleResult2.qb
+    dataQb = dataFilter.qb
 
     dataQb = applySearch(dataQb, query.search, ["code", "name"])
     dataQb = applyFilters(dataQb, query.filter)
-    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "name", "status"])
+    dataQb = applySort(
+        dataQb,
+        query,
+        ["created_at", "updated_at", "code", "name", "status"]
+    )
 
     const { data, error } = await dataQb
         .range(offset, offset + limit - 1)
@@ -379,7 +417,14 @@ const syncCategoryItems = async ({ updated_from }, apiKey) => {
 
     return {
         serverTime: new Date().toISOString(),
-        items: data
+        items: data,
+        pagination: {
+            page,
+            limit,
+            total,
+            total_pages: totalPages,
+            has_more: page < totalPages
+        }
     }
 }
 
