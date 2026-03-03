@@ -11,6 +11,7 @@ import catalogRoutes from './catalog.routes.js'
 import activityLogRoutes from './activity.log.routes.js'
 import apiKeyRoutes from './api.key.routes.js'
 import importRoutes from "./import.route.js"
+import exportRoutes from './export.route.js'
 import { limiterMiddleware } from '../middlewares/limiter.middleware.js'
 import { authMiddleware } from '../middlewares/auth.middleware.js'
 import { apiKeyMiddleware } from '../middlewares/apiKey.middleware.js'
@@ -47,5 +48,7 @@ router.use('/api-key', apiKeyRoutes)
 router.use('/activity-log', activityLogRoutes)
 
 router.use('/import', importRoutes)
+
+router.use('/export', exportRoutes)
 
 export default router
