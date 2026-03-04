@@ -232,33 +232,46 @@ const getLegalDocumentsWithFile = async (query) => {
     const page = Math.max(parseInt(query.page) || 1, 1)
     const limit = Math.min(parseInt(query.limit) || 20, 100)
     const offset = (page - 1) * limit
+    let countQb = supabase
+        .from('public_legal_document')
+        .select('*', { count: "exact", head: true })
+        .not('file_name', 'is', null)
+        .not('file_url', 'is', null)
+        .eq('status', 'active');
 
-    // Khởi tạo query builder
-    let qb = supabase
+    countQb = applySearch(countQb, query.search, ["code", "title", "issued_by_name", "file_name"])
+
+    const { count, error: countError } = await countQb
+    if (countError) throw countError
+
+    const total = count || 0
+    const totalPages = Math.ceil(total / limit)
+
+    if (page > totalPages && totalPages !== 0) {
+        return {
+            data: [],
+            pagination: {
+                page,
+                limit,
+                total,
+                total_pages: totalPages,
+                has_more: false
+            }
+        }
+    }
+
+    let dataQb = supabase
         .from('public_legal_document')
         .select('*', { count: "exact" })
         .not('file_name', 'is', null)
         .not('file_url', 'is', null)
         .eq('status', 'active');
 
-    if (query.search) {
-        const s = query.search;
+    dataQb = applySearch(dataQb, query.search, ["code", "title", "issued_by_name", "file_name"])
+    dataQb = applySort(dataQb, query, ["created_at", "updated_at", "code", "status", "title", "type"])
 
-        qb = qb.or(
-            `code.ilike.%${s}%,title.ilike.%${s}%`
-        )
-    }
-
-
-    const sortBy = query.sortBy || "created_at";
-    const sortOrder = query.sort === "asc" ? true : false
-
-    qb = qb.order(sortBy, { ascending: sortOrder })
-    qb = qb.order("id", { ascending: true })
-
-    qb = qb.range(offset, offset + limit - 1)
-
-    const { data, error, count } = await qb
+    const { data, error } = await dataQb
+        .range(offset, offset + limit - 1)
 
     if (error) throw error
 
@@ -267,9 +280,10 @@ const getLegalDocumentsWithFile = async (query) => {
         pagination: {
             page,
             limit,
-            total: count,
-            totalPages: Math.ceil(count / limit),
-        },
+            total,
+            total_pages: totalPages,
+            has_more: page < totalPages
+        }
     }
 }
 
