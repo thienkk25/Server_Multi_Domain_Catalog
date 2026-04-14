@@ -58,6 +58,23 @@ export const applyFilters = (qb, filters = {}) => {
             }
         }
 
+        // Date BETWEEN (e.g. key: "created_at_between", value: "2024-01-01,2024-01-31")
+        if (key.endsWith("_between")) {
+            const actualKey = key.replace("_between", "");
+            if (Array.isArray(value) && value.length === 2) {
+                let start = value[0];
+                let end = value[1];
+
+                // Include the full end day if only YYYY-MM-DD is provided
+                if (end.length === 10 && !end.includes("T")) {
+                    end = `${end}T23:59:59.999Z`;
+                }
+
+                qb = qb.gte(actualKey, start).lte(actualKey, end);
+            }
+            continue;
+        }
+
         // JSONB role
         if (key === "role_code") {
             qb = qb.eq("role->>code", value);
