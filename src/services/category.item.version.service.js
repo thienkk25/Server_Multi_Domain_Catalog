@@ -2,6 +2,7 @@ import supabase from '../configs/supabase.js'
 import {
     applyRoleFilter,
     applyFilters,
+    applySearch,
     applySort
 } from '../utils/query.builder.js'
 
@@ -42,6 +43,11 @@ const getAll = async (query, user_id, role) => {
     countQb = applyVersionRole(countQb, role, user_id)
 
     countQb = applyFilters(countQb, query.filter)
+    countQb = applySearch(countQb, query.search, [
+        "item->>code", "item->>name", 
+        "new_value->>code", "new_value->>name", 
+        "old_value->>code", "old_value->>name"
+    ])
 
     const { count, error: countError } = await countQb
     if (countError) throw countError
@@ -77,6 +83,11 @@ const getAll = async (query, user_id, role) => {
     dataQb = applyVersionRole(dataQb, role, user_id)
 
     dataQb = applyFilters(dataQb, query.filter)
+    dataQb = applySearch(dataQb, query.search, [
+        "item->>code", "item->>name", 
+        "new_value->>code", "new_value->>name", 
+        "old_value->>code", "old_value->>name"
+    ])
     dataQb = applySort(dataQb, query, ["created_at", "applied_at", "updated_at", "status"])
 
     const { data, error } = await dataQb
