@@ -21,7 +21,7 @@ const changePassword = async ({ new_password }) => {
     return getProfile()
 }
 
-const updateProfile = async ({ phone, full_name }) => {
+const updateProfile = async ({ phone, full_name, image_url }) => {
     const payload = {}
 
     if (phone !== undefined) {
@@ -35,6 +35,7 @@ const updateProfile = async ({ phone, full_name }) => {
     }
 
     if (full_name !== undefined) payload.full_name = full_name
+    if (image_url !== undefined) payload.image_url = image_url
 
     if (Object.keys(payload).length === 0) {
         throw new Error('No data to update')

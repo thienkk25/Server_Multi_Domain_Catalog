@@ -61,6 +61,7 @@ export const importUsersManagement = async (filePath) => {
                     user_metadata: {
                         'phone': row.phone,
                         'full_name': row.full_name,
+                        'image_url': row.image_url,
                     },
                     email_confirm: true,
                 });

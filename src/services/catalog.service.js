@@ -64,7 +64,7 @@ const getDomains = async (query, apiKey) => {
 
     let dataQb = supabase
         .from('domain')
-        .select("id,code,name")
+        .select("id,code,name,image_url")
 
     const roleResult2 = applyDomainFilter(dataQb, apiKey, "id")
 
@@ -157,6 +157,7 @@ const getCategoryGroups = async (query, apiKey) => {
             code,
             name,
             description,
+            image_url,
             domain:domain_id (
                 id,
                 code,
@@ -203,6 +204,7 @@ const getCategoryGroupById = async (id, apiKey) => {
             code,
             name,
             description,
+            image_url,
             domain:domain_id (
                 id,
                 code,

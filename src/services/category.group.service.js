@@ -55,6 +55,7 @@ const getAll = async (query, role) => {
             code,
             name,
             description,
+            image_url,
             domain:domain_id (
                 id,
                 code,
@@ -101,6 +102,7 @@ const getById = async (id, role) => {
             code,
             name,
             description,
+            image_url,
             domain:domain_id (
                 id,
                 code,
