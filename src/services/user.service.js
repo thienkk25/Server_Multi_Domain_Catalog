@@ -1,6 +1,6 @@
 import supabase from '../configs/supabase.js'
 
-const changePassword = async ({ new_password }) => {
+const changePassword = async (userId, { new_password }) => {
     if (
         new_password.length < 8 ||
         !/[A-Z]/.test(new_password) ||
@@ -9,8 +9,7 @@ const changePassword = async ({ new_password }) => {
         throw new Error('Invalid password');
     }
 
-
-    const { error } = await supabase.auth.updateUser({
+    const { error } = await supabase.auth.admin.updateUserById(userId, {
         password: new_password
     });
 
@@ -18,20 +17,24 @@ const changePassword = async ({ new_password }) => {
         throw error
     }
 
-    return getProfile()
+    return getProfile(userId)
 }
 
-const updateProfile = async ({ phone, full_name, image_url }) => {
+const updateProfile = async (userId, { phone, full_name, image_url }) => {
     const payload = {}
 
     if (phone !== undefined) {
-        const regPhone = /^(?:\+84|0084|0)(3|5|7|8|9)[0-9]{8}$/;
+        if (phone === null || phone === '') {
+            payload.phone = null;
+        } else {
+            const regPhone = /^(?:\+84|0084|0)(3|5|7|8|9)[0-9]{8}$/;
 
-        if (!regPhone.test(phone)) {
-            throw new Error('Invalid phone number');
+            if (!regPhone.test(phone)) {
+                throw new Error('Invalid phone number');
+            }
+
+            payload.phone = phone;
         }
-
-        payload.phone = phone;
     }
 
     if (full_name !== undefined) payload.full_name = full_name
@@ -41,15 +44,16 @@ const updateProfile = async ({ phone, full_name, image_url }) => {
         throw new Error('No data to update')
     }
 
-    const { error } = await supabase.auth.updateUser({
-        data: payload
-    })
+    const { error } = await supabase
+        .from('users')
+        .update(payload)
+        .eq('id', userId)
 
     if (error) {
         throw error
     }
 
-    return getProfile()
+    return getProfile(userId)
 }
 
 const getProfile = async (id) => {

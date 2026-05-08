@@ -2,7 +2,7 @@ import { userService } from '../services/user.service.js'
 
 const changePassword = async (req, res, next) => {
     try {
-        const result = await userService.changePassword(req.body)
+        const result = await userService.changePassword(req.user.id, req.body)
         res.json({
             success: true,
             data: result
@@ -13,7 +13,7 @@ const changePassword = async (req, res, next) => {
 }
 const updateProfile = async (req, res, next) => {
     try {
-        const result = await userService.updateProfile(req.body)
+        const result = await userService.updateProfile(req.user.id, req.body)
         res.json({
             success: true,
             data: result

@@ -58,17 +58,21 @@ export const importUsersManagement = async (filePath) => {
                 await supabase.auth.admin.createUser({
                     email: row.email,
                     password: '12345678',
-                    user_metadata: {
-                        'phone': row.phone,
-                        'full_name': row.full_name,
-                        'image_url': row.image_url,
-                    },
                     email_confirm: true,
                 });
 
             if (error) throw error;
 
             userId = data.user.id;
+
+            const userPayload = {};
+            if (row.full_name !== undefined) userPayload.full_name = row.full_name;
+            if (row.phone !== undefined) userPayload.phone = row.phone;
+            if (row.image_url !== undefined) userPayload.image_url = row.image_url;
+
+            if (Object.keys(userPayload).length > 0) {
+                await supabase.from('users').update(userPayload).eq('id', userId);
+            }
 
             //  ROLE 
             const roleCode = row.role?.trim();

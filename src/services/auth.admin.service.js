@@ -71,24 +71,32 @@ const getById = async (id) => {
     return data
 }
 
-const create = async ({ email, password, user_metadata }) => {
+const create = async ({ email, password, full_name, phone, image_url }) => {
     if (password == null || password == '' || password == undefined) {
         password = '12345678'
     }
     const { data, error } = await supabase.auth.admin.createUser({
         email: email,
         password: password,
-        user_metadata: user_metadata,
         email_confirm: true,
         phone_confirm: false,
     })
     if (error) throw error
 
+    const payload = {}
+    if (full_name !== undefined) payload.full_name = full_name
+    if (phone !== undefined) payload.phone = phone
+    if (image_url !== undefined) payload.image_url = image_url
+
+    if (Object.keys(payload).length > 0) {
+        await supabase.from('users').update(payload).eq('id', data.user.id)
+    }
+
     return getById(data.user.id)
 
 }
 
-const update = async ({ id, password, user_metadata }) => {
+const update = async ({ id, password, full_name, phone, image_url }) => {
     const { data: current, error: getError } =
         await supabase.auth.admin.getUserById(id)
 
@@ -100,16 +108,19 @@ const update = async ({ id, password, user_metadata }) => {
         payload.password = password
     }
 
-    // MERGE user_metadata
-    if (user_metadata && Object.keys(user_metadata).length > 0) {
-        payload.user_metadata = {
-            ...(current.user.user_metadata ?? {}),
-            ...user_metadata,
-        }
+    if (Object.keys(payload).length > 0) {
+        const { error } = await supabase.auth.admin.updateUserById(id, payload)
+        if (error) throw error
     }
 
-    const { error } = await supabase.auth.admin.updateUserById(id, payload)
-    if (error) throw error
+    const userPayload = {}
+    if (full_name !== undefined) userPayload.full_name = full_name
+    if (phone !== undefined) userPayload.phone = phone
+    if (image_url !== undefined) userPayload.image_url = image_url
+
+    if (Object.keys(userPayload).length > 0) {
+        await supabase.from('users').update(userPayload).eq('id', id)
+    }
 
     return getById(id)
 }

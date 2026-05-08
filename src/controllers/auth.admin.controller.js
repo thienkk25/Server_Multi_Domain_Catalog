@@ -45,7 +45,9 @@ const update = async (req, res, next) => {
         const result = await authAdminService.update({
             id,
             password: req.body.password,
-            user_metadata: req.body.user_metadata,
+            full_name: req.body.full_name,
+            phone: req.body.phone,
+            image_url: req.body.image_url,
         })
 
         res.json({
