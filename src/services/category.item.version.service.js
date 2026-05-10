@@ -44,8 +44,8 @@ const getAll = async (query, user_id, role) => {
 
     countQb = applyFilters(countQb, query.filter)
     countQb = applySearch(countQb, query.search, [
-        "item->>code", "item->>name", 
-        "new_value->>code", "new_value->>name", 
+        "item->>code", "item->>name",
+        "new_value->>code", "new_value->>name",
         "old_value->>code", "old_value->>name"
     ])
 
@@ -84,8 +84,8 @@ const getAll = async (query, user_id, role) => {
 
     dataQb = applyFilters(dataQb, query.filter)
     dataQb = applySearch(dataQb, query.search, [
-        "item->>code", "item->>name", 
-        "new_value->>code", "new_value->>name", 
+        "item->>code", "item->>name",
+        "new_value->>code", "new_value->>name",
         "old_value->>code", "old_value->>name"
     ])
     dataQb = applySort(dataQb, query, ["created_at", "applied_at", "updated_at", "status"])
@@ -215,7 +215,7 @@ const createVersion = async (user_id, role, {
             p_legal_ids: legal_document_ids
         })
 
-    if (error_legal_document_ids) throw error
+    if (error_legal_document_ids) throw error_legal_document_ids
 
     return getVersionById(versionId, user_id, role)
 }
