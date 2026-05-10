@@ -42,6 +42,8 @@ tags:
     description: Activity log (admin)
   - name: Import
     description: Import CSV/XLSX (admin/domainOfficer)
+  - name: Export
+    description: Export CSV/XLSX (admin/domainOfficer/approver)
 
 paths:
   /public/catalog/domains:
@@ -1368,6 +1370,74 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ImportEnvelope"
+
+  /export/single:
+    get:
+      tags: [Export]
+      summary: Export single table
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: "1=domain, 2=category_group, 3=category_item, 4=api_key, 5=users"
+        - name: format
+          in: query
+          schema:
+            type: string
+          description: "csv or xlsx (default xlsx)"
+      responses:
+        "200":
+          description: OK (File download)
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /export/catalog:
+    get:
+      tags: [Export]
+      summary: Export catalog (domain + group + item) (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+          description: "csv or xlsx (default xlsx)"
+      responses:
+        "200":
+          description: OK (File download)
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
 components:
   securitySchemes:
