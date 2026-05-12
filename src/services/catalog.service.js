@@ -294,8 +294,14 @@ const getCategoryItems = async (query, apiKey) => {
     if (error) throw error
 
     return {
-        serverTime: new Date().toISOString(),
-        items: data
+        data,
+        pagination: {
+            page,
+            limit,
+            total,
+            total_pages: totalPages,
+            has_more: page < totalPages
+        }
     }
 }
 
