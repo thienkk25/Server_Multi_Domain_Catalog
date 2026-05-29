@@ -183,7 +183,15 @@ const uploadFile = async (file) => {
         .from(file.originalname, 'latin1')
         .toString('utf8');
 
-    const storagePath = `files/${fileName}`
+    const safeName = fileName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9_\.\-]/g, '');
+
+    const storagePath = `files/${safeName}`
 
     const { data, error } = await supabase.storage
         .from('legal_document_file')
