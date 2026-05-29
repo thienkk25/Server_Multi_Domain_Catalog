@@ -179,25 +179,17 @@ const uploadFile = async (file) => {
 
     if (!file) throw new Error('File is required')
 
-    const ext = path.extname(file.originalname)
-    const baseName = path.basename(file.originalname, ext)
-
-    const safeName = baseName
-        .toLowerCase()
-        .replace(/[^a-z0-9-_]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-
-    const storageKey = `${crypto.randomUUID()}-${safeName}${ext}`
     const fileName = Buffer
         .from(file.originalname, 'latin1')
         .toString('utf8');
 
-    const storagePath = `files/${storageKey}`
+    const storagePath = `files/${fileName}`
 
     const { data, error } = await supabase.storage
         .from('legal_document_file')
         .upload(storagePath, file.buffer, {
             contentType: file.mimetype,
+            upsert: true,
         })
 
     if (error) throw error

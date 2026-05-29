@@ -5,8 +5,8 @@ export const uploadCsv = multer({
     storage: multer.diskStorage({
         destination: 'tmp/',
         filename: (req, file, cb) => {
-            const ext = path.extname(file.originalname);
-            cb(null, `${Date.now()}${ext}`);
+            const fileName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+            cb(null, fileName);
         },
     }),
     limits: { fileSize: 50 * 1024 * 1024 },
